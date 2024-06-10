@@ -1,8 +1,10 @@
 <template>
   <q-page class="flex flex-center">
     <div class="q-pa-md row items-start q-gutter-md" style="max-width: 400px">
-      <q-card class="my-card basic shadow-16">
-        <img src="https://cdn.quasar.dev/img/parallax2.jpg" />
+      <q-card class="shadow-16">
+        <div class="flex justify-center items-center">
+          <img class="my-card" src="../../assets/img/svg/userplus.svg" />
+        </div>
 
         <q-list class="q-ma-sm">
           <q-form>
@@ -253,3 +255,9 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.my-card {
+  height: 50%;
+  width: 50%;
+}
+</style>

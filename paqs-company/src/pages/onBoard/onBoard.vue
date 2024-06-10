@@ -1,50 +1,39 @@
 <template>
-  <transition
-    name="fade"
-    mode="out-in"
-  >
-    <q-page class="flex flex-center colors">
-      <div
-        :key="message"
-        class="square twitter"
-      >
-        <span />
-        <span />
-        <span />
-        <div class="content">
-          <img
-            src="../../assets/images/main-01.svg"
-            alt="company_logo"
-          >
-          <div class="containers">
-            Make your
-            <div class="flips">
-              <div><div>product</div></div>
-              <div><div>brand</div></div>
-              <div><div>customers feel</div></div>
-            </div>
-            AweSoMe!
-          </div>
-        </div>
+  <transition name="fade" mode="out-in">
+    <q-page
+      class="flex flex-center colors fullscreen md:fullscreen sm:fullscreen"
+    >
+      <div class="context">
+        <img
+          src="../../assets/images/main-01.svg"
+          class="q-mx-xl"
+          alt="company_logo"
+        />
+      </div>
+
+      <div class="area">
+        <ul class="circles">
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
       </div>
     </q-page>
   </transition>
 </template>
 <script>
 export default {
-  data() {
-    return {
-      message: 'Welcome',
-    };
-  },
   mounted() {
-    // Automatically navigate to another page or route after 3 seconds
     setTimeout(() => {
-      this.message = 'Redirecting...';
-      setTimeout(() => {
-        this.$router.push('/auth/login'); // Change '/dashboard' to your desired route
-      }, 1000); // Wait for the transition to complete before navigating
-    }, 5000); // 5 seconds
+      this.$router.push("/auth/welcome");
+    }, 2000);
   },
 };
 </script>
@@ -57,209 +46,160 @@ export default {
 .fade-leave-to {
   opacity: 0;
 }
-.containers {
-  color: #999;
-  text-transform: uppercase;
-  font-size: 36px;
-  font-weight: bold;
-  /* padding-top: 200px; */
-  position: relative;
+.context {
   width: 100%;
-  bottom: 4%;
-  display: block;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+}
+.context img {
+  position: relative;
+}
+img {
+  object-fit: contain;
+  width: 100%;
 }
 
-.flips {
-  height: 50px;
+@media (max-width: 600px) {
+  img {
+    height: 150px;
+  }
+}
+@media (max-width: 200px) {
+  img {
+    height: 150px;
+  }
+}
+@media (max-width: 700px) {
+  img {
+    height: 150px;
+  }
+}
+@media (min-width: 700px) {
+  img {
+    height: 150px;
+  }
+}
+
+.context h1 {
+  text-align: center;
+  color: #fff;
+  font-size: 50px;
+}
+
+.area {
+  background: rgb(242, 242, 244);
+  background: -webkit-linear-gradient(to left, #8f94fb, #4e54c8);
+  width: 100%;
+  height: 100vh;
+}
+
+.circles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
-.flips > div > div {
-  color: #fff;
-  padding: 4px 12px;
-  height: 45px;
-  margin-bottom: 45px;
-  display: inline-block;
-}
-
-.flips div:first-child {
-  animation: show 5s linear infinite;
-}
-
-.flips div div {
-  background: #d4651b;
-}
-.flips div:first-child div {
-  background: #f4e10e;
-}
-.flips div:last-child div {
-  background: #0ae072;
-}
-
-@keyframes show {
-  0% {
-    margin-top: -270px;
-  }
-  5% {
-    margin-top: -180px;
-  }
-  33% {
-    margin-top: -180px;
-  }
-  38% {
-    margin-top: -90px;
-  }
-  66% {
-    margin-top: -90px;
-  }
-  71% {
-    margin-top: 0px;
-  }
-  99.99% {
-    margin-top: 0px;
-  }
-  100% {
-    margin-top: -270px;
-  }
-}
-.square {
-  position: relative;
-  margin: 0 10px;
-  width: 400px;
-  height: 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.colors {
-  background-color: cornsilk;
-}
-
-.square span:nth-child(1) {
+.circles li {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 2px solid black;
-  border-radius: 32% 58% 69% 43% / 48% 32% 59% 55%;
-  transition: 0.5s;
-  animation: animate 6s linear infinite;
+  display: block;
+  list-style: none;
+  width: 20px;
+  height: 20px;
+  background: rgba(35, 88, 213, 0.464);
+  animation: animate 25s linear infinite;
+  bottom: -150px;
 }
 
-.linkedin:hover span:nth-child(1) {
-  border: none;
-  background: #f07e6e;
+.circles li:nth-child(1) {
+  left: 25%;
+  width: 80px;
+  height: 80px;
+  animation-delay: 0s;
 }
 
-.twitter:hover span:nth-child(1) {
-  border: none;
-  background: #84cdfa;
+.circles li:nth-child(2) {
+  left: 10%;
+  width: 20px;
+  height: 20px;
+  animation-delay: 2s;
+  animation-duration: 12s;
 }
 
-.github:hover span:nth-child(1) {
-  border: none;
-  background: #5ad1cd;
+.circles li:nth-child(3) {
+  left: 70%;
+  width: 20px;
+  height: 20px;
+  animation-delay: 4s;
 }
 
-.square span:nth-child(2) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 2px solid black;
-  border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
-  transition: 0.5s;
-  animation: animate 4s linear infinite;
+.circles li:nth-child(4) {
+  left: 40%;
+  width: 60px;
+  height: 60px;
+  animation-delay: 0s;
+  animation-duration: 18s;
 }
 
-.linkedin:hover span:nth-child(2) {
-  border: none;
-  background: #f07e6e;
+.circles li:nth-child(5) {
+  left: 65%;
+  width: 20px;
+  height: 20px;
+  animation-delay: 0s;
 }
 
-.twitter:hover span:nth-child(2) {
-  border: none;
-  background: #84cdfa;
+.circles li:nth-child(6) {
+  left: 75%;
+  width: 110px;
+  height: 110px;
+  animation-delay: 3s;
 }
 
-.github:hover span:nth-child(2) {
-  border: none;
-  background: #5ad1cd;
+.circles li:nth-child(7) {
+  left: 35%;
+  width: 150px;
+  height: 150px;
+  animation-delay: 7s;
 }
 
-.square span:nth-child(3) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 2px solid black;
-  border-radius: 31% 45% 74% 35% / 38% 56% 51% 87%;
-  transition: 0.5s;
-  animation: animate2 10s linear infinite;
+.circles li:nth-child(8) {
+  left: 50%;
+  width: 25px;
+  height: 25px;
+  animation-delay: 15s;
+  animation-duration: 45s;
 }
 
-.linkedin:hover span:nth-child(3) {
-  border: none;
-  background: #f07e6e;
+.circles li:nth-child(9) {
+  left: 20%;
+  width: 15px;
+  height: 15px;
+  animation-delay: 2s;
+  animation-duration: 35s;
 }
 
-.twitter:hover span:nth-child(3) {
-  border: none;
-  background: #84cdfa;
+.circles li:nth-child(10) {
+  left: 85%;
+  width: 150px;
+  height: 150px;
+  animation-delay: 0s;
+  animation-duration: 11s;
 }
 
-.github:hover span:nth-child(3) {
-  border: none;
-  background: #5ad1cd;
-}
-
-.content {
-  position: relative;
-  /* margin-top: 30%; */
-  color: #fff;
-  text-align: center;
-  transition: 0.5s;
-  z-index: 1000;
-}
-
-.content a {
-  position: relative;
-  display: inline-block;
-  /* margin-top: 10px; */
-  border: 2px solid #fff;
-  padding: 6px 18px;
-  text-decoration: none;
-  color: #fff;
-  font-weight: 600;
-  border-radius: 73% 27% 44% 56% / 49% 44% 56% 51%;
-}
-
-.content a:hover {
-  background: white;
-  color: #333;
-}
-img {
-  max-width: 60%;
-}
 @keyframes animate {
   0% {
-    transform: rotate(0deg);
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+    border-radius: 0;
   }
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
-@keyframes animate2 {
-  0% {
-    transform: rotate(360deg);
-  }
   100% {
-    transform: rotate(0deg);
+    transform: translateY(-1000px) rotate(720deg);
+    opacity: 0;
+    border-radius: 50%;
   }
 }
 </style>
