@@ -10,31 +10,34 @@ const routes = [
   {
     path: "/auth",
     component: () => import("layouts/publicLayout.vue"),
-    redirect: { name: "Login" },
-    meta: { public: true },
     children: [
       {
-        path: "/auth/login",
+        path: "login",
         name: "Login",
         component: () => import("pages/public/Login.vue"),
+        meta: { public: true },
       },
       {
-        path: "/auth/register",
+        path: "register",
         name: "Register",
         component: () => import("pages/public/Register.vue"),
+        meta: { public: true },
       },
       {
-        path: "/auth/forgot-password",
+        path: "forgot-password",
         name: "ForgotPassword",
         component: () => import("pages/public/ForgotPassword.vue"),
+        meta: { public: true },
       },
       {
         path: "verify",
-        component: () => import("pages/_auth/verifyEmail.vue"),
+        component: () => import("pages/public/verifyEmail.vue"),
+        meta: { public: true },
       },
       {
         path: "resetPassword",
-        component: () => import("pages/_auth/resetPassword.vue"),
+        component: () => import("pages/public/resetPassword.vue"),
+        meta: { public: true },
       },
     ],
   },

@@ -83,6 +83,7 @@ export const useAuthStore = defineStore("auth", {
       this.isLoading = true;
       try {
         const response = await AUTH.register(data);
+        console.log(response);
         if (response.status === 201) {
           this.router.push({ path: "/auth/verify" });
           Notify.create({

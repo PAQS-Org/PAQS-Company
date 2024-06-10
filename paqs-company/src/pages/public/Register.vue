@@ -7,7 +7,7 @@
         </div>
 
         <q-list class="q-ma-sm">
-          <q-form @submit.prevent="onSubmit" ref="form">
+          <q-form ref="form">
             <q-input
               v-model.trim="$v.user.first_name.$model"
               class="q-mx-lg"
@@ -142,8 +142,8 @@
             <div align="center" class="q-mb-lg">
               <q-btn
                 label="Sign Up"
-                to="/auth/login"
-                type="submit"
+                @submit.prevent="onSubmit"
+                type="button"
                 color="primary"
                 :disable="!$v.$anyDirty || $v.$invalid"
               />
@@ -230,28 +230,37 @@ const resetCompanyLogo = () => {
 
 const onSubmit = async () => {
   $v.value.$touch();
-  if ($v.value.$invalid) {
+  if (v$.value.$pending || v$.value.$invalid) {
+    $q.notify({
+      color: "red-5",
+      textColor: "white",
+      icon: "warning",
+      message: "Please correct the errors in the form",
+    });
     return;
   }
 
-  if (!isLoading) {
-    if (validPassword()) {
-      const formData = new FormData();
-      formData.append("first_name", user.first_name);
-      formData.append("last_name", user.last_name);
-      formData.append("email", user.email);
-      formData.append("password", user.password);
-      formData.append("company_name", user.company_name);
-      formData.append("company_logo", user.company_logo);
+  if (validPassword()) {
+    const formData = new FormData();
+    formData.append("first_name", user.first_name);
+    formData.append("last_name", user.last_name);
+    formData.append("email", user.email);
+    formData.append("password", user.password);
+    formData.append("company_name", user.company_name);
+    formData.append("company_logo", user.company_logo);
 
-      try {
-        await register(formData);
-      } catch (error) {
-        // Handle the error
-      }
-    } else {
-      wrongPass.value = true;
+    try {
+      await register(formData);
+    } catch (error) {
+      $q.notify({
+        color: "red-5",
+        textColor: "white",
+        icon: "warning",
+        message: "Error submitting form",
+      });
     }
+  } else {
+    wrongPass.value = true;
   }
 };
 

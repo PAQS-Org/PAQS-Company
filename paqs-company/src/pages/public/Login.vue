@@ -7,7 +7,7 @@
         </div>
 
         <q-list class="">
-          <q-form @submit.prevent="onSubmit" ref="form">
+          <q-form ref="form">
             <q-input
               v-model.trim="storeAuth.email"
               class="q-mx-lg"
@@ -46,8 +46,7 @@
               <q-btn
                 class="col"
                 label="Submit"
-                type="submit"
-                :loading="isLoading"
+                @submit.prevent="onSubmit"
                 color="primary"
                 :disable="!$v.$anyDirty || $v.$invalid"
               />
