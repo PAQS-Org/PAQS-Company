@@ -1,16 +1,16 @@
-import { boot } from 'quasar/wrappers';
-import { useAuthStore } from 'src/stores/auth.js';
+import { boot } from "quasar/wrappers";
+import { useAuthStore } from "src/stores/auth.js";
 
 export default boot(({ store, router }) => {
   const auth = useAuthStore(store);
 
   router.beforeEach((to, from, next) => {
-    const isAuthenticated = auth.getAccessToken;
+    const isAuthenticated = auth.accessToken;
     const isPublic = to.matched.some((record) => record.meta.public);
 
     // If not authenticated, redirect to Login
-    if (!isAuthenticated && !isPublic && to.name !== 'Login') {
-      next({ name: 'Login' });
+    if (!isAuthenticated && !isPublic && to.name !== "Login") {
+      next({ name: "Login" });
     } else {
       next();
     }

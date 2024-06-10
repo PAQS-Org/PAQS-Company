@@ -1,20 +1,21 @@
 <template>
   <q-page class="flex flex-center">
     <div class="q-pa-md row items-start q-gutter-md" style="max-width: 400px">
-      <q-card class="basic shadow-16">
-        <div class="flex justify-center items-center">
+      <q-card class="shadow-16 bg-gray-200">
+        <div class="flex justify-center items-center bg-white">
           <img class="my-card" src="../../assets/img/svg/usershield.svg" />
         </div>
 
         <q-list class="">
-          <Form ref="form">
+          <q-form @submit.prevent="onSubmit" ref="form">
             <q-input
-              v-model="user.email"
+              v-model.trim="storeAuth.email"
               class="q-mx-lg"
               type="email"
               label="Email"
               lazy-rules
-              :rules="[required('Email'), email(user.email)]"
+              :error="$v.user.email.$error"
+              :error-message="'A valid email is required'"
             >
               <template #prepend>
                 <q-icon name="email" />
@@ -22,10 +23,11 @@
             </q-input>
 
             <q-input
-              v-model="user.password"
+              v-model.trim="$v.user.password.$model"
               class="q-mx-lg"
               label="Password"
-              :rules="[(v) => required(v, 'Password')]"
+              :error="$v.user.password.$error"
+              :error-message="'Password is required'"
               :type="visibility ? 'text' : 'password'"
             >
               <template #prepend>
@@ -40,23 +42,27 @@
               </template>
             </q-input>
 
-            <div align="center" class="q-mb-lg q-mt-lg">
+            <div align="center" class="q-mx-sm row q-my-lg">
               <q-btn
+                class="col"
                 label="Submit"
                 type="submit"
                 :loading="isLoading"
                 color="primary"
-                @click.prevent="onSubmit"
+                :disable="!$v.$anyDirty || $v.$invalid"
               />
-              <router-link :to="{ name: 'dashboard' }" class="col-12 q-ml-sm">
+              <div
+                @click.prevent="forgottenPassword"
+                class="col q-ml-sm cursor-pointer"
+              >
                 <span>Forgot password?</span>
-              </router-link>
+              </div>
               <q-btn
                 label="Reset"
                 type="reset"
                 color="primary"
                 flat
-                class="q-ml-sm"
+                class="col"
                 @click.prevent="onReset"
               />
             </div>
@@ -74,109 +80,128 @@
                 label="Sign Up"
               />
             </q-list>
-          </Form>
+          </q-form>
         </q-list>
       </q-card>
     </div>
   </q-page>
 </template>
 
-<script>
-import { defineComponent, reactive, ref } from "vue";
-import useValidation from "src/composables/validation.js";
+<script setup>
+import { reactive, ref, computed } from "vue";
 import { useAuthStore } from "src/stores/auth.js";
 import { useQuasar } from "quasar";
+import useVuelidate from "@vuelidate/core";
+import { required, email } from "@vuelidate/validators";
 
-export default defineComponent({
-  name: "LoginComp",
-
-  setup() {
-    const { required, email } = useValidation();
-    const { isLoading, login } = useAuthStore();
-
-    const $q = useQuasar();
-
-    // const storedAccept = localStorage.getItem('keepLoggedIn');
-    // const accept = ref(storedAccept !== null ? storedAccept === 'true' : false);
-    const form = ref(null);
-    const user = reactive({ email: undefined, password: undefined });
-    const visibility = ref(false);
-
-    const validate = () => {
-      const validEmail = email(user.email);
-      // You can add more validation checks here
-
-      return validEmail; // Add more conditions based on your validation requirements
-    };
-
-    const onSubmit = async () => {
-      if (!isLoading) {
-        if (validate()) {
-          try {
-            const response = await login(user);
-            if (response.status === 200) {
-              // Successful login
-              // if (accept.value) {
-              //   localStorage.setItem('access_token', response.data.access);
-              // } else {
-              //   localStorage.removeItem('keepLoggedIn');
-              // }
-              $q.notify({
-                type: "positive",
-                message: "Login successful!",
-              });
-            } else {
-              // Unsuccessful login, display error message
-              const errorMessage = response.data
-                ? response.data.message
-                : "Check your email and password.";
-              $q.notify({
-                type: "negative",
-                message: errorMessage,
-              });
-            }
-          } catch (error) {
-            // Display the error message to the user
-            const errorMessage = error.response
-              ? error.response.data.message
-              : "I did it.";
-            $q.notify({
-              type: "negative",
-              message: errorMessage,
-            });
-          }
-        } else {
-          // Display an error message to the user (e.g., validation error)
-          $q.notify({
-            type: "warning",
-            message: "Validation error. Please check your inputs.",
-          });
-        }
-      }
-    };
-
-    const onReset = () => {
-      form.value.resetValidation();
-      // ... your other reset logic
-    };
-
-    return {
-      form,
-      email,
-      required,
-      user,
-      visibility,
-      validate,
-      isLoading,
-      onSubmit,
-      onReset,
-    };
-  },
+defineOptions({
+  name: "loginComp",
 });
+
+// const { isLoading, logins, resetPassword } = useAuthStore();
+const storeAuth = useAuthStore();
+
+const $q = useQuasar();
+
+const form = ref(null);
+const user = reactive({ email: computed(() => storeAuth.email), password: "" });
+const visibility = ref(false);
+
+const rules = {
+  user: {
+    email: { required, email },
+    password: { required },
+  },
+};
+
+const $v = useVuelidate(rules, { user });
+
+const onSubmit = async () => {
+  $v.value.$touch();
+  if ($v.value.$invalid) {
+    $q.notify({
+      type: "warning",
+      message: "Validation error. Please check your inputs.",
+    });
+    return;
+  }
+
+  if (!storeAuth.isLoading) {
+    try {
+      const response = await storeAuth.logins(user);
+      if (response.status === 200) {
+        $q.notify({
+          type: "positive",
+          message: "Login successful!",
+        });
+      } else {
+        const errorMessage = response.data
+          ? response.data.message
+          : "Check your email and password.";
+        $q.notify({
+          type: "negative",
+          message: errorMessage,
+        });
+      }
+    } catch (error) {
+      const errorMessage = error.response
+        ? error.response.data.message
+        : "An error occurred.";
+      $q.notify({
+        type: "negative",
+        message: errorMessage,
+      });
+    }
+  }
+};
+
+const forgottenPassword = async () => {
+  user.password = ""; // Ensure the password field is empty
+  $v.value.user.password.$reset(); // Reset password validation
+  $v.value.user.email.$touch(); // Validate email
+
+  if ($v.value.user.email.$invalid) {
+    $q.notify({
+      color: "red-5",
+      textColor: "white",
+      icon: "warning",
+      message: "Please provide a valid email address",
+    });
+    return;
+  }
+
+  // Proceed with forgot password logic
+  try {
+    // Replace with your actual forgot password function
+    await storeAuth.resetPassword({
+      email: user.email,
+      redirect_url: "http://localhost:9000/#/auth/forgot",
+    });
+    $q.notify({
+      type: "positive",
+      message: "Password reset email sent successfully!",
+    });
+  } catch (error) {
+    $q.notify({
+      color: "red-5",
+      textColor: "white",
+      icon: "warning",
+      message: "Error submitting form",
+    });
+  }
+};
+
+const onReset = () => {
+  $v.value.$reset();
+  user.email = "";
+  user.password = "";
+  visibility.value = false;
+};
 </script>
+
 <style scoped>
 .my-card {
-  height: 50%;
-  width: 50%;
+  max-width: 50%;
+  height: auto;
 }
 </style>

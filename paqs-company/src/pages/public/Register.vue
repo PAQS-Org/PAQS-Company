@@ -1,39 +1,47 @@
 <template>
   <q-page class="flex flex-center">
     <div class="q-pa-md row items-start q-gutter-md" style="max-width: 400px">
-      <q-card class="shadow-16">
-        <div class="flex justify-center items-center">
+      <q-card class="shadow-16 bg-gray-200">
+        <div class="flex justify-center items-center bg-white">
           <img class="my-card" src="../../assets/img/svg/userplus.svg" />
         </div>
 
         <q-list class="q-ma-sm">
-          <q-form>
+          <q-form @submit.prevent="onSubmit" ref="form">
             <q-input
-              v-model="user.first_name"
+              v-model.trim="$v.user.first_name.$model"
               class="q-mx-lg"
               type="text"
               label="First Name"
+              :error="!$v.user.first_name.required && $v.user.first_name.$dirty"
+              :error-message="'First name is required'"
             >
               <template #prepend>
                 <q-icon name="person" />
               </template>
             </q-input>
             <q-input
-              v-model="user.last_name"
+              v-model.trim="$v.user.last_name.$model"
               class="q-mx-lg"
               type="text"
               label="Last Name"
+              :error="!$v.user.last_name.required && $v.user.last_name.$dirty"
+              :error-message="'Last name is required'"
             >
               <template #prepend>
                 <q-icon name="person" />
               </template>
             </q-input>
             <q-input
-              v-model="user.email"
+              v-model.trim="$v.user.email.$model"
               class="q-mx-lg"
               type="email"
               label="Email"
-              :rules="[required('Email'), email(user.email)]"
+              :error="
+                (!$v.user.email.required && $v.user.email.$dirty) ||
+                (!$v.user.email.email && $v.user.email.$dirty)
+              "
+              :error-message="'A valid email is required'"
             >
               <template #prepend>
                 <q-icon name="email" />
@@ -41,11 +49,15 @@
             </q-input>
 
             <q-input
-              v-model="user.password"
+              v-model.trim="$v.user.password.$model"
               class="q-mx-lg"
               :type="isPwd ? 'password' : 'text'"
               label="Password"
-              :rules="[required('Password')]"
+              :error="
+                (!$v.user.password.required && $v.user.password.$dirty) ||
+                (!validPassword() && $v.user.password.$dirty)
+              "
+              :error-message="'Password is invalid'"
             >
               <template #prepend>
                 <q-icon name="password" />
@@ -94,17 +106,21 @@
               <q-separator />
             </div>
             <q-input
-              v-model="user.company_name"
+              v-model.trim="$v.user.company_name.$model"
               class="q-mx-lg"
               type="text"
               label="Name of Company"
+              :error="
+                !$v.user.company_name.required && $v.user.company_name.$dirty
+              "
+              :error-message="'Company name is required'"
             >
               <template #prepend>
                 <q-icon name="apartment" />
               </template>
             </q-input>
             <q-file
-              v-model="user.company_logo"
+              v-model.trim="$v.user.company_logo.$model"
               class="q-mx-lg"
               bottom-slots
               label="Company Logo"
@@ -129,7 +145,7 @@
                 to="/auth/login"
                 type="submit"
                 color="primary"
-                @click.prevent="onSubmit"
+                :disable="!$v.$anyDirty || $v.$invalid"
               />
               <q-btn
                 label="Reset"
@@ -159,105 +175,109 @@
   </q-page>
 </template>
 
-<script>
-import { defineComponent, reactive, ref } from "vue";
-import useValidation from "src/composables/validation.js";
+<script setup>
+import { reactive, ref } from "vue";
 import { useAuthStore } from "src/stores/auth.js";
+import useVuelidate from "@vuelidate/core";
+import { required, email } from "@vuelidate/validators";
 
-export default defineComponent({
-  name: "RegisterComp",
+const { isLoading, register } = useAuthStore();
 
-  setup() {
-    const { required, email } = useValidation();
-    const { isLoading, register } = useAuthStore();
-
-    const form = ref(null);
-
-    const user = reactive({
-      first_name: undefined,
-      last_name: undefined,
-      email: undefined,
-      password: undefined,
-      company_name: undefined,
-      company_logo: undefined,
-    });
-    const isPwd = ref(true);
-    const wrongPass = ref(false);
-
-    const validate = () => {
-      const validEmail = email(user.email);
-      // You can add more validation checks here
-
-      return validEmail; // Add more conditions based on your validation requirements
-    };
-    const resetCompanyLogo = () => {
-      user.company_logo = undefined;
-    };
-
-    const onSubmit = async () => {
-      if (!isLoading) {
-        if (validate()) {
-          const formData = new FormData();
-          formData.append("first_name", user.first_name);
-          formData.append("last_name", user.last_name);
-          formData.append("email", user.email);
-          formData.append("password", user.password);
-          formData.append("company_name", user.company_name);
-          formData.append("company_logo", user.company_logo);
-
-          try {
-            await register(formData);
-          } catch (error) {
-            // Handle the error
-          }
-        } else {
-          // Display an error message to the user
-        }
-      }
-    };
-    const resetForm = () => {
-      if (form.value) {
-        form.value.resetValidation(); // Reset validation state if form is available
-        this.user = {
-          first_name: undefined,
-          last_name: undefined,
-          email: undefined,
-          password: undefined,
-          company_name: undefined,
-          company_logo: undefined,
-        };
-        isPwd.value = true;
-        wrongPass.value = false;
-      }
-
-      // Reset user data
-      Object.keys(user).forEach((key) => {
-        user[key] = undefined;
-      });
-
-      resetCompanyLogo(); // Reset company_logo
-
-      // Other reset logic as needed
-    };
-
-    return {
-      wrongPass,
-      isPwd,
-      form,
-      required,
-      email,
-      user,
-      isLoading,
-      onSubmit,
-      resetForm,
-      resetCompanyLogo,
-    };
-  },
+defineOptions({
+  name: "registerComp",
 });
+
+const form = ref(null);
+
+const user = reactive({
+  first_name: "",
+  last_name: "",
+  email: "",
+  password: "",
+  company_name: "",
+  company_logo: null,
+});
+
+const isPwd = ref(true);
+const wrongPass = ref(false);
+
+const rules = {
+  user: {
+    first_name: { required },
+    last_name: { required },
+    email: { required, email },
+    password: { required },
+    company_name: { required },
+    company_logo: { required },
+  },
+};
+
+const $v = useVuelidate(rules, { user });
+
+const validPassword = () => {
+  const pwd = user.password;
+  return (
+    pwd.length >= 8 &&
+    /[A-Z]/.test(pwd) &&
+    /\d/.test(pwd) &&
+    /[!@#$%^&*()-_+=]/.test(pwd)
+  );
+};
+
+const resetCompanyLogo = () => {
+  user.company_logo = null;
+};
+
+const onSubmit = async () => {
+  $v.value.$touch();
+  if ($v.value.$invalid) {
+    return;
+  }
+
+  if (!isLoading) {
+    if (validPassword()) {
+      const formData = new FormData();
+      formData.append("first_name", user.first_name);
+      formData.append("last_name", user.last_name);
+      formData.append("email", user.email);
+      formData.append("password", user.password);
+      formData.append("company_name", user.company_name);
+      formData.append("company_logo", user.company_logo);
+
+      try {
+        await register(formData);
+      } catch (error) {
+        // Handle the error
+      }
+    } else {
+      wrongPass.value = true;
+    }
+  }
+};
+
+const resetForm = () => {
+  if (form.value) {
+    form.value.resetValidation();
+  }
+  $v.value.$reset();
+  user.first_name = "";
+  user.last_name = "";
+  user.email = "";
+  user.password = "";
+  user.company_name = "";
+  user.company_logo = null;
+  isPwd.value = true;
+  wrongPass.value = false;
+};
 </script>
+
 <style scoped>
 .my-card {
-  height: 50%;
-  width: 50%;
+  max-width: 50%;
+  height: auto;
+}
+.password-criteria div {
+  display: flex;
+  align-items: center;
 }
 </style>

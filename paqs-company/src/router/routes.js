@@ -28,6 +28,14 @@ const routes = [
         name: "ForgotPassword",
         component: () => import("pages/public/ForgotPassword.vue"),
       },
+      {
+        path: "verify",
+        component: () => import("pages/_auth/verifyEmail.vue"),
+      },
+      {
+        path: "resetPassword",
+        component: () => import("pages/_auth/resetPassword.vue"),
+      },
     ],
   },
   // {
