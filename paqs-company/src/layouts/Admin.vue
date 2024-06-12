@@ -14,7 +14,7 @@
         <q-space />
         <q-space />
         <q-space />
-        <div v-if="$q.screen.lt.md">
+        <div>
           <h3>
             Welcome
             <strong
@@ -86,9 +86,11 @@
           style="height: 150px"
         >
           <div class="absolute-bottom bg-transparent">
-            <q-avatar size="56px" class="q-mb-sm">
-              <img :src="authStore.company_logo" alt="Company Logo" />
-            </q-avatar>
+            <div class="flex justify-center items-center mt-2">
+              <q-avatar size="100px" class="q-mb-sm">
+                <img :src="authStore.company_logo" alt="Company Logo" />
+              </q-avatar>
+            </div>
             <div class="text-weight-bold">
               <span class="q-mr-xs">{{ authStore.first_name }}</span>
               <span>{{ authStore.last_name }}</span>
@@ -111,8 +113,6 @@
         </q-page>
       </q-page-container>
     </q-layout>
-
-    <!-- <sidebar /> -->
   </div>
 </template>
 <script setup>
@@ -130,7 +130,6 @@ const miniState = ref(true);
 const authStore = useAuthStore();
 
 const logoutSys = async () => {
-  console.log("hi");
   await authStore.logout();
 };
 </script>

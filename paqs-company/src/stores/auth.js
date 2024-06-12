@@ -69,9 +69,10 @@ export const useAuthStore = defineStore("auth", {
         const res = await AUTH.login(credentials);
         console.log(res);
         if (res.status === 200) {
+          const baseURL = "http://127.0.0.1:8000";
           const userDetails = {
             company_name: res.data.company_name,
-            company_logo: res.data.company_logo,
+            company_logo: `${baseURL}/images/${res.data.company_logo}`,
             first_name: res.data.first_name,
             last_name: res.data.last_name,
             email: res.data.email,
@@ -107,7 +108,6 @@ export const useAuthStore = defineStore("auth", {
       this.isLoading = true;
       try {
         const response = await AUTH.register(data);
-        console.log(response);
         if (response.status === 201) {
           this.router.push({ path: "/auth/verify" });
           Notify.create({
@@ -183,7 +183,6 @@ export const useAuthStore = defineStore("auth", {
       this.isLoading = true;
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        console.log(refreshToken);
         const res = await AUTH.logout({ refresh_token: refreshToken });
         if (res.status === 204) {
           this.removeUser();
