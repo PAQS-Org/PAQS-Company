@@ -73,6 +73,11 @@ const routes = [
         component: () => import("pages/admin/GenerateQR.vue"),
       },
       {
+        path: "update",
+        name: "updatecode",
+        component: () => import("pages/admin/UpdateCodes.vue"),
+      },
+      {
         path: "table-list",
         name: "table-list",
         component: () => import("pages/admin/Tables.vue"),

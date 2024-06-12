@@ -20,9 +20,12 @@ export const useProdStore = defineStore({
       perish: false,
       perDate: { from: "2022/01/01", to: "2023/01/05" },
       prodLogo: ref(null),
-      qrType: "svg",
+      qrType: "",
+      upReason: "",
       imgFmt: ["svg", "png", "jpg"],
-      quantity: "500",
+      reason: ["Update the product message", "Callback a batch"],
+      message: "",
+      quantity: "",
     },
     payInfo: {
       fullname: "AlincoBay",
@@ -179,6 +182,18 @@ export const useProdStore = defineStore({
       const num = 1;
       console.log(num);
       return num * 2;
+    },
+    async updatecodes() {
+      try {
+        const res = await $axios.patch("qrcodes/Updates/", {
+          product_name: this.prodInfo.prodName,
+          batch: this.prodInfo.batchCode,
+          reason: this.prodInfo.reason,
+          message: this.prodInfo.message,
+        });
+        if (res.status == 204) {
+        }
+      } catch (error) {}
     },
   },
 });

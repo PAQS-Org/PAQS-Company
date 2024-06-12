@@ -55,6 +55,12 @@
               </q-item-section>
               <q-item-section> Generate QR Code </q-item-section>
             </q-item>
+            <q-item v-ripple to="/dash/update" clickable>
+              <q-item-section avatar>
+                <q-icon name="update" />
+              </q-item-section>
+              <q-item-section> Update </q-item-section>
+            </q-item>
 
             <q-item v-ripple clickable to="/dash/table-list">
               <q-item-section avatar>
