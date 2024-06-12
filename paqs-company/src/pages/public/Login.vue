@@ -29,6 +29,7 @@
               :error="$v.user.password.$error"
               :error-message="'Password is required'"
               :type="visibility ? 'text' : 'password'"
+              @keydown.enter.prevent="onSubmit"
             >
               <template #prepend>
                 <q-icon name="password" />

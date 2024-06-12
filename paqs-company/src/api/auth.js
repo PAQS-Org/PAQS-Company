@@ -7,7 +7,7 @@ export default {
     $axios.post("account/company-request-reset-email/", email),
   setNewPasswords: (data) =>
     $axios.patch("/account/company-password-reset/", data),
-  logout: () => $axios.get("account/logout/"),
+  logout: (token) => $axios.post("account/logout/", token),
   facebook: (credentials) => $axios.post("socialLogin/facebook/", credentials),
   x: (credentials) => $axios.post("socialLogin/twitter/", credentials),
   google: (credentials) => $axios.post("socialLogin/google/", credentials),

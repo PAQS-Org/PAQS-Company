@@ -11,6 +11,8 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     isLoading: false,
 
+    first_name: localStorage.getItem("first_name") || "",
+    last_name: localStorage.getItem("last_name") || "",
     company_name: localStorage.getItem("company_name") || "",
     company_logo: localStorage.getItem("company_logo") || "",
     email: localStorage.getItem("email") || "",
@@ -33,10 +35,14 @@ export const useAuthStore = defineStore("auth", {
 
     saveUser(token, userDetails) {
       this.setAccessToken(token);
+
+      this.first_name = userDetails.first_name;
+      this.last_name = userDetails.last_name;
       this.company_name = userDetails.company_name;
       this.company_logo = userDetails.company_logo;
       this.email = userDetails.email;
-
+      localStorage.setItem("first_name", userDetails.first_name);
+      localStorage.setItem("last_name", userDetails.last_name);
       localStorage.setItem("company_name", userDetails.company_name);
       localStorage.setItem("company_logo", userDetails.company_logo);
       localStorage.setItem("email", userDetails.email);
@@ -47,11 +53,15 @@ export const useAuthStore = defineStore("auth", {
       localStorage.removeItem("company_name");
       localStorage.removeItem("company_logo");
       localStorage.removeItem("email");
+      localStorage.removeItem("first_name");
+      localStorage.removeItem("last_name");
       this.accessToken = "";
       this.refreshToken = "";
       this.company_name = "";
       this.company_logo = "";
       this.email = "";
+      this.first_name = "";
+      this.last_name = "";
     },
 
     async logins(credentials) {
@@ -62,6 +72,8 @@ export const useAuthStore = defineStore("auth", {
           const userDetails = {
             company_name: res.data.company_name,
             company_logo: res.data.company_logo,
+            first_name: res.data.first_name,
+            last_name: res.data.last_name,
             email: res.data.email,
           };
           this.saveUser(res.data.tokens.access, userDetails);
@@ -74,9 +86,19 @@ export const useAuthStore = defineStore("auth", {
           this.router.push({ path: "/dash/main" });
         }
       } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
         Notify.create({
           type: "negative",
-          message: "Invalid credentials",
+          message: errorMessage,
         });
       }
     },
@@ -93,10 +115,20 @@ export const useAuthStore = defineStore("auth", {
             message: "Verify the email in your mail. Registration successful",
           });
         }
-      } catch (error) {
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
         Notify.create({
           type: "negative",
-          message: error.message,
+          message: errorMessage,
         });
       }
     },
@@ -112,10 +144,20 @@ export const useAuthStore = defineStore("auth", {
             message: "Password reset successful",
           });
         }
-      } catch (error) {
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
         Notify.create({
           type: "negative",
-          message: error.message,
+          message: errorMessage,
         });
       }
     },
@@ -141,6 +183,7 @@ export const useAuthStore = defineStore("auth", {
       this.isLoading = true;
       try {
         const refreshToken = localStorage.getItem("refreshToken");
+        console.log(refreshToken);
         const res = await AUTH.logout({ refresh_token: refreshToken });
         if (res.status === 204) {
           this.removeUser();
@@ -150,10 +193,20 @@ export const useAuthStore = defineStore("auth", {
           type: "positive",
           message: "Logout successful",
         });
-      } catch (error) {
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
         Notify.create({
           type: "negative",
-          message: error.message || "Logout failed",
+          message: errorMessage,
         });
       }
     },
@@ -168,10 +221,20 @@ export const useAuthStore = defineStore("auth", {
             message: "Subscription successfully created",
           });
         }
-      } catch (error) {
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
         Notify.create({
           type: "negative",
-          message: "Subscription rejected",
+          message: errorMessage,
         });
       }
     },

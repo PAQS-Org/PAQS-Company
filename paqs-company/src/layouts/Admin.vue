@@ -1,6 +1,30 @@
 <template>
   <div>
     <q-layout view="lHh Lpr lFf">
+      <q-toolbar v-if="$q.screen.lt.md" class="bg-emerald-600">
+        <q-btn
+          flat
+          dense
+          round
+          @click="drawer = true"
+          aria-label="Menu"
+          icon="menu"
+        />
+
+        <q-space />
+        <q-space />
+        <q-space />
+        <div v-if="$q.screen.lt.md">
+          <h3>
+            Welcome
+            <strong
+              ><span class="q-mr-xs">{{ authStore.first_name }}</span>
+              <span>{{ authStore.last_name }}</span></strong
+            >
+          </h3>
+        </div>
+      </q-toolbar>
+
       <q-drawer
         v-model="drawer"
         show-if-above
@@ -18,78 +42,42 @@
           :horizontal-thumb-style="{ opacity: 0 }"
         >
           <q-list padding>
-            <q-item
-              v-ripple
-              clickable
-              to="/dash/main"
-            >
+            <q-item v-ripple clickable to="/dash/main">
               <q-item-section avatar>
                 <q-icon name="home" />
               </q-item-section>
 
-              <q-item-section>
-                Dashboard
-              </q-item-section>
+              <q-item-section> Dashboard </q-item-section>
             </q-item>
-            <q-item
-              v-ripple
-              to="/dash/generate"
-              clickable
-            >
+            <q-item v-ripple to="/dash/generate" clickable>
               <q-item-section avatar>
                 <q-icon name="engineering" />
               </q-item-section>
-              <q-item-section>
-                Generate QR Code
-              </q-item-section>
+              <q-item-section> Generate QR Code </q-item-section>
             </q-item>
 
-            <q-item
-              v-ripple
-              clickable
-              to="/dash/table-list"
-            >
+            <q-item v-ripple clickable to="/dash/table-list">
               <q-item-section avatar>
                 <q-icon name="receipt_long" />
               </q-item-section>
-              <q-item-section>
-                Invoice
-              </q-item-section>
+              <q-item-section> Invoice </q-item-section>
             </q-item>
 
-            <q-item
-              v-ripple
-              clickable
-              to="/dash/scan"
-            >
+            <q-item v-ripple clickable to="/dash/scan">
               <q-item-section avatar>
                 <q-icon name="qr_code_scanner" />
               </q-item-section>
-              <q-item-section>
-                QR scanner
-              </q-item-section>
+              <q-item-section> QR scanner </q-item-section>
             </q-item>
             <!-- <q-separator style="margin-top: 15rem" /> -->
             <q-separator />
 
-            <!-- <div class="q-px-md text-grey-9">
-            <div class="row items-center q-gutter-x-sm q-gutter-y-xs">
-              <a
-
-              >
-                world
-              </a>
-            </div>
-          </div>
-          <div class="q-py-md q-px-md text-grey-9">
-            <div class="row items-center q-gutter-x-sm q-gutter-y-xs">
-              <a
-
-              >
-                Hello
-              </a>
-            </div>
-          </div> -->
+            <q-item v-ripple clickable @click="logoutSys">
+              <q-item-section avatar>
+                <q-icon name="logout" />
+              </q-item-section>
+              <q-item-section> Logout </q-item-section>
+            </q-item>
           </q-list>
         </q-scroll-area>
         <q-img
@@ -98,19 +86,14 @@
           style="height: 150px"
         >
           <div class="absolute-bottom bg-transparent">
-            <!-- <q-avatar
-              size="56px"
-              class="q-mb-sm"
-            >
-              <img
-                :src="authenticatedUser.company_logo"
-                alt="Company Logo"
-              >
-            </q-avatar> -->
+            <q-avatar size="56px" class="q-mb-sm">
+              <img :src="authStore.company_logo" alt="Company Logo" />
+            </q-avatar>
             <div class="text-weight-bold">
-              <!-- {{ authenticatedUser.company_logo }} -->
+              <span class="q-mr-xs">{{ authStore.first_name }}</span>
+              <span>{{ authStore.last_name }}</span>
             </div>
-            <!-- <div>@{{ authenticatedUser.name_of_company }}</div> -->
+            <div>@{{ authStore.company_name }}</div>
           </div>
         </q-img>
       </q-drawer>
@@ -132,38 +115,22 @@
     <!-- <sidebar /> -->
   </div>
 </template>
-<script>
-import { ref } from 'vue';
-// import { useAuthStore } from 'src/stores/auth.js';
-// import AdminNavbar from "../components/Navbars/AdminNavbar.vue";
-// import Sidebar from "../components/Sidebar/Sidebar.vue";
-import HeaderStats from '../components/Headers/HeaderStats.vue';
-import FooterAdmin from '../components/Footers/FooterAdmin.vue';
+<script setup>
+import { ref } from "vue";
+import { useAuthStore } from "src/stores/auth.js";
+import HeaderStats from "../components/Headers/HeaderStats.vue";
+import FooterAdmin from "../components/Footers/FooterAdmin.vue";
 
-export default {
-  name: 'AdminLayout',
-  components: {
-    // AdminNavbar,
-    // Sidebar,
-    HeaderStats,
-    FooterAdmin,
-  },
-  setup() {
-    const drawer = ref(false);
-    const miniState = ref(true);
-    // const authStore = useAuthStore('auth'); // Access the Vuex store
+defineOptions({
+  name: "AdminLayout",
+});
 
-    // Use a computed property to determine the authentication status
-    // const isAuthenticated = computed(() => authStore.isAuthenticated);
-    // const authenticatedUser = computed(() => authStore.user);
-    // Replace 'user' with the actual name of your user state in the store
+const drawer = ref(false);
+const miniState = ref(true);
+const authStore = useAuthStore();
 
-    return {
-      drawer,
-      miniState,
-      // authenticatedUser,
-      // isAuthenticated,
-    };
-  },
+const logoutSys = async () => {
+  console.log("hi");
+  await authStore.logout();
 };
 </script>
