@@ -6,7 +6,7 @@
         <div
           class="w-full max-w-full px-3 mx-auto mt-0 text-center lg:flex-0 shrink-0 lg:w-5/12"
         >
-          <h1 class="mt-6 mb-2 text-black">Email Verification</h1>
+          <h1 class="mt-6 mb-2 text-white">Email Verification</h1>
         </div>
       </div>
     </div>
@@ -18,7 +18,7 @@
       >
         <!-- Card -->
         <div
-          class="max-w-sm rounded-xl border-2 border-blue-900 bg-gray-50 overflow-hidden shadow-lg"
+          class="max-w-sm rounded-xl border-2 border-blue-900 bg-gray-200 overflow-hidden shadow-lg"
         >
           <div class="px-6 py-4">
             <div class="flex text-xl mb-2">

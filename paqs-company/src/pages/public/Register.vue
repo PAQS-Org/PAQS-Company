@@ -142,7 +142,7 @@
             <div align="center" class="q-mb-lg">
               <q-btn
                 label="Sign Up"
-                @submit.prevent="onSubmit"
+                @click.prevent="onSubmit"
                 type="button"
                 color="primary"
                 :disable="!$v.$anyDirty || $v.$invalid"
@@ -230,7 +230,7 @@ const resetCompanyLogo = () => {
 
 const onSubmit = async () => {
   $v.value.$touch();
-  if (v$.value.$pending || v$.value.$invalid) {
+  if ($v.value.$pending || $v.value.$invalid) {
     $q.notify({
       color: "red-5",
       textColor: "white",

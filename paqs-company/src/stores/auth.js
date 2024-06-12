@@ -10,9 +10,7 @@ const { updateMenu } = useGlobalStore();
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     isLoading: false,
-    isLoggedIn: !!localStorage.getItem("accessToken"),
-    first_name: localStorage.getItem("first_name") || "",
-    last_name: localStorage.getItem("last_name") || "",
+
     company_name: localStorage.getItem("company_name") || "",
     company_logo: localStorage.getItem("company_logo") || "",
     email: localStorage.getItem("email") || "",
@@ -21,34 +19,38 @@ export const useAuthStore = defineStore("auth", {
     notif: localStorage.getItem("neverShowNotificationsBanner") || "",
     subsq: localStorage.getItem("subsq") || "",
   }),
+  getters: {
+    isLoggedIn(state) {
+      return !!state.accessToken;
+    },
+  },
 
   actions: {
     setAccessToken(token) {
       this.accessToken = token;
-      localStorage.setItem("access_token", token);
+      localStorage.setItem("accessToken", token);
     },
 
     saveUser(token, userDetails) {
-      this.accessToken = token;
-      this.first_name = userDetails.first_name;
-      this.last_name = userDetails.last_name;
+      this.setAccessToken(token);
+      this.company_name = userDetails.company_name;
+      this.company_logo = userDetails.company_logo;
       this.email = userDetails.email;
 
-      localStorage.setItem("accessToken", token);
-      localStorage.setItem("first_name", userDetails.first_name);
-      localStorage.setItem("last_name", userDetails.last_name);
+      localStorage.setItem("company_name", userDetails.company_name);
+      localStorage.setItem("company_logo", userDetails.company_logo);
       localStorage.setItem("email", userDetails.email);
-      this.isLoggedIn = true;
     },
     removeUser() {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
-      localStorage.removeItem("first_name");
-      localStorage.removeItem("last_name");
+      localStorage.removeItem("company_name");
+      localStorage.removeItem("company_logo");
       localStorage.removeItem("email");
-      this.isLoggedIn = false;
-      this.first_name = "";
-      this.last_name = "";
+      this.accessToken = "";
+      this.refreshToken = "";
+      this.company_name = "";
+      this.company_logo = "";
       this.email = "";
     },
 
@@ -58,8 +60,8 @@ export const useAuthStore = defineStore("auth", {
         console.log(res);
         if (res.status === 200) {
           const userDetails = {
-            first_name: res.data.first_name,
-            last_name: res.data.last_name,
+            company_name: res.data.company_name,
+            company_logo: res.data.company_logo,
             email: res.data.email,
           };
           this.saveUser(res.data.tokens.access, userDetails);
@@ -69,7 +71,7 @@ export const useAuthStore = defineStore("auth", {
             type: "positive",
             message: "Login successful",
           });
-          this.router.push({ path: "/" });
+          this.router.push({ path: "/dash/main" });
         }
       } catch (e) {
         Notify.create({
@@ -142,7 +144,7 @@ export const useAuthStore = defineStore("auth", {
         const res = await AUTH.logout({ refresh_token: refreshToken });
         if (res.status === 204) {
           this.removeUser();
-          this.router.push({ path: "/" });
+          this.router.push({ name: "Login" });
         }
         Notify.create({
           type: "positive",

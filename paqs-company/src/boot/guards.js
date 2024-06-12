@@ -4,22 +4,24 @@ import { useAuthStore } from "src/stores/auth.js";
 export default boot(({ store, router }) => {
   const auth = useAuthStore(store);
 
+  auth.$patch({
+    accessToken: localStorage.getItem("accessToken") || "",
+  });
+
   router.beforeEach((to, from, next) => {
     const isAuthenticated = auth.accessToken;
     const isPublic = to.matched.some((record) => record.meta.public);
 
-    // If not authenticated, redirect to Login
-    if (!isAuthenticated && !isPublic && to.name !== "Login") {
-      next({ name: "Login" });
-    } else {
-      next();
+    // If not authenticated and trying to access a private route, redirect to Login
+    if (!isAuthenticated && !isPublic) {
+      return next({ name: "Login" });
     }
 
-    // If authenticated, don't allow access to public pages
-    // if (isAuthenticated && isPublic && to.name !== 'dashboard') {
-    //   next({ name: 'dashboard' });
-    // } else {
-    //   next();
-    // }
+    // If authenticated and trying to access a public page, redirect to Dashboard
+    if (isAuthenticated && isPublic && to.name !== "dashboard") {
+      return next({ name: "dashboard" });
+    }
+
+    next();
   });
 });

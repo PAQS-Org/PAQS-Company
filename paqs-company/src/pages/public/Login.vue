@@ -46,7 +46,7 @@
               <q-btn
                 class="col"
                 label="Submit"
-                @submit.prevent="onSubmit"
+                @click.prevent="onSubmit"
                 color="primary"
                 :disable="!$v.$anyDirty || $v.$invalid"
               />
@@ -126,31 +126,7 @@ const onSubmit = async () => {
   }
 
   if (!storeAuth.isLoading) {
-    try {
-      const response = await storeAuth.logins(user);
-      if (response.status === 200) {
-        $q.notify({
-          type: "positive",
-          message: "Login successful!",
-        });
-      } else {
-        const errorMessage = response.data
-          ? response.data.message
-          : "Check your email and password.";
-        $q.notify({
-          type: "negative",
-          message: errorMessage,
-        });
-      }
-    } catch (error) {
-      const errorMessage = error.response
-        ? error.response.data.message
-        : "An error occurred.";
-      $q.notify({
-        type: "negative",
-        message: errorMessage,
-      });
-    }
+    await storeAuth.logins(user);
   }
 };
 

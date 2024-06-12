@@ -10,6 +10,7 @@ const routes = [
   {
     path: "/auth",
     component: () => import("layouts/publicLayout.vue"),
+    meta: { public: true },
     children: [
       {
         path: "login",
@@ -41,62 +42,53 @@ const routes = [
       },
     ],
   },
-  // {
-  //   path: '/main',
-  //   component: () => import('layouts/Main.vue'),
-  //   redirect: { name: 'Home' },
-  //   meta: { public: true },
-  //   children: [
-  //     {
-  //       path: '/main/home',
-  //       name: 'Home',
-  //       component: () => import('pages/Home.vue'),
-  //     },
-  //   ],
-  // },
   {
     path: "/dash",
     component: () => import("layouts/Admin.vue"),
-    redirect: { name: "Dash" },
-    meta: { public: true },
+    redirect: { name: "dashboard" },
     children: [
       {
-        path: "/dash/main",
+        path: "main",
         name: "dashboard",
         component: () => import("pages/admin/Dashboard.vue"),
       },
       {
-        path: "/dash/maps",
+        path: "maps",
         name: "maps",
         component: () => import("pages/admin/Maps.vue"),
       },
       {
-        path: "/dash/scan",
+        path: "scan",
         name: "scan",
         component: () => import("pages/admin/Scan.vue"),
       },
       {
-        path: "/dash/settings",
+        path: "settings",
         name: "settings",
         component: () => import("pages/admin/Settings.vue"),
       },
       {
-        path: "/dash/generate",
+        path: "generate",
         name: "GCode",
         component: () => import("pages/admin/GenerateQR.vue"),
       },
       {
-        path: "/dash/table-list",
+        path: "table-list",
         name: "table-list",
         component: () => import("pages/admin/Tables.vue"),
       },
     ],
   },
+
   {
     path: "/:catchAll(.*)*",
     component: () => import("layouts/Main.vue"),
     children: [
-      { path: "", name: "Error", component: () => import("pages/Error.vue") },
+      {
+        path: "",
+        name: "Error",
+        component: () => import("pages/ErrorNotFound.vue"),
+      },
     ],
   },
 ];

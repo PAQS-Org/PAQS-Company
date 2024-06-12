@@ -1,7 +1,7 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import dayjs from "dayjs";
-import { Loading, QSpinnerGears } from "quasar";
+import { Loading, QSpinnerBall, QSpinnerGears } from "quasar";
 
 const $axios = axios.create({
   baseURL: "http://127.0.0.1:8000",
@@ -16,10 +16,10 @@ export default () => {
     let refreshToken = localStorage.getItem("refreshToken");
 
     Loading.show({
-      spinner: QSpinnerGears, // You can choose other spinners as well
+      spinner: QSpinnerBall, // You can choose other spinners as well
       message: "Loading...",
       spinnerSize: 140,
-      spinnerColor: "white",
+      spinnerColor: "red",
     });
 
     if (accessToken) {
