@@ -1213,6 +1213,17 @@ select {
   appearance: none;
 }
 
+.bg-image {
+  background-image: url("../assets/img/svg/Artboard3.svg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.bg-image-2 {
+  background-image: url("../assets/img/svg/Artboard4.svg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .bg-fixed {
   background-attachment: fixed;
 }

@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-layout view="lHh Lpr lFf">
-      <q-toolbar v-if="$q.screen.lt.md" class="bg-emerald-600">
+      <q-toolbar v-if="$q.screen.lt.md" class="bg-image-2">
         <q-btn
           flat
           dense
@@ -88,7 +88,7 @@
         </q-scroll-area>
         <q-img
           class="absolute-top"
-          src="https://cdn.quasar.dev/img/material.png"
+          src="../assets/img/svg/Artboard3.svg"
           style="height: 150px"
         >
           <div class="absolute-bottom bg-transparent">

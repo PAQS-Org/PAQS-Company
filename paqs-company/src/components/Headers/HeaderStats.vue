@@ -1,6 +1,6 @@
 <template>
   <!-- Header -->
-  <div class="relative bg-emerald-600 md:pt-32 pb-32 pt-12">
+  <div class="relative bg-image-2 md:pt-32 pb-32 pt-12">
     <div class="px-4 md:px-10 mx-auto w-full">
       <div>
         <!-- Card stats -->
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import CardStats from '../Cards/CardStats.vue';
+import CardStats from "../Cards/CardStats.vue";
 
 export default {
   components: {
@@ -68,3 +68,4 @@ export default {
   },
 };
 </script>
+<style scoped></style>

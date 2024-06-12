@@ -1,7 +1,7 @@
 <template>
   <footer class="block py-4">
     <div class="container mx-auto px-4">
-      <hr class="mb-4 border-b-1 border-blueGray-200">
+      <hr class="mb-4 border-b-1 border-blueGray-200" />
       <div
         class="flex flex-wrap items-center md:justify-between justify-center"
       >
@@ -11,7 +11,7 @@
           >
             Copyright © {{ date }}
             <a
-              href="https://www.creative-tim.com?ref=vn-footer-admin"
+              href="#"
               class="text-blueGray-500 hover:text-blueGray-700 text-sm font-semibold py-1"
             >
               Osahene Tech Lab
@@ -22,36 +22,32 @@
           <ul class="flex flex-wrap list-none md:justify-end justify-center">
             <li>
               <a
-                href="https://www.creative-tim.com?ref=vn-footer-admin"
-                class="text-blueGray-600 hover:text-blueGray-800
-                text-sm font-semibold block py-1 px-3"
+                href="#"
+                class="text-blueGray-600 hover:text-blueGray-800 text-sm font-semibold block py-1 px-3"
               >
                 Blackmore
               </a>
             </li>
             <li>
               <a
-                href="https://www.creative-tim.com/presentation?ref=vn-footer-admin"
-                class="text-blueGray-600 hover:text-blueGray-800
-                text-sm font-semibold block py-1 px-3"
+                href="#"
+                class="text-blueGray-600 hover:text-blueGray-800 text-sm font-semibold block py-1 px-3"
               >
                 About Us
               </a>
             </li>
             <li>
               <a
-                href="http://blog.creative-tim.com?ref=vn-footer-admin"
-                class="text-blueGray-600 hover:text-blueGray-800
-                text-sm font-semibold block py-1 px-3"
+                href="#"
+                class="text-blueGray-600 hover:text-blueGray-800 text-sm font-semibold block py-1 px-3"
               >
                 Blog
               </a>
             </li>
             <li>
               <a
-                href="https://github.com/creativetimofficial/vue-notus/blob/main/LICENSE.md?ref=vn-footer-admin"
-                class="text-blueGray-600 hover:text-blueGray-800
-                text-sm font-semibold block py-1 px-3"
+                href="#"
+                class="text-blueGray-600 hover:text-blueGray-800 text-sm font-semibold block py-1 px-3"
               >
                 MIT License
               </a>
