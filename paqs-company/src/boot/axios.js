@@ -31,7 +31,7 @@ export default () => {
       } else if (refreshToken) {
         try {
           const response = await axios.post(
-            `${req.baseURL}account/token/refresh/`,
+            `${req.baseURL}/account/token/refresh/`,
             {
               refresh: refreshToken,
             }

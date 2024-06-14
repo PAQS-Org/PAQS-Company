@@ -8,97 +8,147 @@
         <div class="relative w-full px-4 max-w-full flex-grow flex-1">
           <div class="block w-full overflow-x-auto">
             <q-table
+              v-if="rows && rows.length > 0"
               class="my-sticky-header-column-table"
               :dense="$q.screen.lt.md"
-              title="Invoice"
+              :title="titles"
               :rows="rows"
               :columns="columns"
               row-key="name"
+            >
+              <template v-slot:body-cell-download="props">
+                <q-td :props="props">
+                  <q-btn
+                    :loading="progress[props.row.id]?.loading"
+                    :percentage="progress[props.row.id]?.percentage"
+                    round
+                    @click="
+                      startDownload(props.row.id, props.row.download, $event)
+                    "
+                    color="secondary"
+                    icon="cloud_download"
+                  />
+                </q-td>
+              </template>
+            </q-table>
+            <q-pagination
+              v-if="totalPages > 1"
+              v-model="localCurrentPage"
+              :min="1"
+              :max="totalPages"
+              :max-pages="5"
+              @update:model-value="pageChanged"
             />
+            <div v-else class="no-data">
+              <img
+                src="../../assets/img/svg/empty.svg"
+                alt="No Data Available"
+              />
+              <div class="mt-3">
+                <strong>There is no data in the table.</strong>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-<script>
-const columns = [
-  {
-    name: 'name',
-    required: true,
-    label: 'Invoice #',
-    align: 'left',
-    field: (row) => row.name,
-    format: (val) => `${val}`,
-    sortable: true,
-  },
-  {
-    name: 'date', align: 'center', label: 'Date & Time', field: 'date', sortable: true,
-  },
-  {
-    name: 'qty', label: 'Quantity', field: 'qty', sortable: true,
-  },
-  {
-    name: 'amount', label: 'Amount ($)', field: 'amount', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
-  },
-  {
-    name: 'mode', label: 'Mode of Payment', field: 'mode', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
-  },
-];
 
-const rows = [
-  {
-    name: '445252ad!5338',
-    date: '04/05/2021',
-    qty: '70 000',
-    amount: '1,500',
-    mode: 'visa',
-  },
-  {
-    name: '445252ad!5338',
-    date: '30/05/2021',
-    qty: '70 000',
-    amount: '1,500',
-    mode: 'visa',
-  },
-  {
-    name: '445252ad!5338',
-    date: '14/06/2021',
-    qty: '20 000',
-    amount: '2,500',
-    mode: 'visa',
-  },
-  {
-    name: '445252ad!5338',
-    date: '04/05/2021',
-    qty: '100 000',
-    amount: '3,500',
-    mode: 'visa',
-  },
+<script setup>
+import { ref, onBeforeUnmount, watch } from "vue";
 
-];
+defineOptions({
+  name: "transactionTable",
+});
+// Initialize progress as an empty object
+const progress = ref({});
 
-export default {
-  components: {
-    // TableDropdown,
-  },
-  props: {
-    color: {
-      default: 'light',
-      validator(value) {
-        // The value must match one of these strings
-        return ['light', 'dark'].indexOf(value) !== -1;
-      },
+const intervals = ref({});
+
+// Define props
+const props = defineProps({
+  color: {
+    default: "light",
+    validator(value) {
+      return ["light", "dark"].indexOf(value) !== -1;
     },
   },
-  data() {
-    return {
-      columns,
-      rows,
-    };
+  columns: {
+    type: Array,
+    required: true,
   },
+  rows: {
+    type: Array,
+    required: true,
+    default: () => [],
+  },
+  titles: {
+    type: String,
+    required: true,
+  },
+  currentPage: {
+    type: Number,
+    required: true,
+    default: 1,
+  },
+  totalPages: {
+    type: Number,
+    required: true,
+    default: 1,
+  },
+});
+
+const emit = defineEmits(["page-changed"]);
+
+// Local currentPage state
+const localCurrentPage = ref(props.currentPage);
+
+// Watch for prop changes to sync local state
+watch(
+  () => props.currentPage,
+  (newPage) => {
+    localCurrentPage.value = newPage;
+  }
+);
+
+const startDownload = (id, url, event) => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (progress.value[id].loading) {
+    return; // Prevent starting a new download if one is already in progress
+  }
+
+  progress.value[id].loading = true;
+  progress.value[id].percentage = 0;
+
+  intervals.value[id] = setInterval(() => {
+    progress.value[id].percentage += Math.floor(Math.random() * 8 + 10);
+    if (progress.value[id].percentage >= 100) {
+      clearInterval(intervals.value[id]);
+      progress.value[id].loading = false;
+
+      // Create a link element, set the download attribute, and click it to download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = ""; // Use appropriate filename if needed
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, 700);
 };
+
+const pageChanged = (page) => {
+  emit("page-changed", page);
+};
+
+onBeforeUnmount(() => {
+  Object.values(intervals.value).forEach(clearInterval);
+});
 </script>
+
 <style lang="sass">
 .my-sticky-header-column-table
   /* height or max-height is important */
@@ -138,4 +188,13 @@ export default {
   td:first-child, th:first-child
     position: sticky
     left: 0
+.no-data
+  display: flex
+  justify-content: center
+  align-items: center
+  flex-direction: column
+  height: 300px
+  img
+    max-width: 20%
+    height: auto
 </style>

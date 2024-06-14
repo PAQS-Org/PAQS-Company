@@ -190,7 +190,7 @@
           <!-- step 3 ends -->
         </q-step>
         <!-- step 4 -->
-        <q-step :name="4" title="Peace Out" icon="settings">
+        <q-step :name="3" title="Peace Out" icon="done_all">
           <div class="grid">
             <div class="flex-row text-center">
               <h3 style="font-size: 60px; text-transform: uppercase">

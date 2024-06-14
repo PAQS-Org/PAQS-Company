@@ -9,5 +9,9 @@
   </div>
 </template>
 <script setup>
-import CardTable from "../../components/Cards/CardUpdate.vue";
+import { defineAsyncComponent } from "vue";
+
+const CardTable = defineAsyncComponent(() =>
+  import("../../components/Cards/CardUpdate.vue")
+);
 </script>

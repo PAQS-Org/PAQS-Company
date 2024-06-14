@@ -9,14 +9,13 @@
     </div>
   </div>
 </template>
-<script>
-import CardSettings from "../../components/Cards/CardSettings.vue";
-import CardProfile from "../../components/Cards/CardProfile.vue";
+<script setup>
+import { defineAsyncComponent } from "vue";
 
-export default {
-  components: {
-    CardSettings,
-    CardProfile,
-  },
-};
+const CardProfile = defineAsyncComponent(() =>
+  import("../../components/Cards/CardProfile.vue")
+);
+const CardSettings = defineAsyncComponent(() =>
+  import("../../components/Cards/CardSettings.vue")
+);
 </script>
