@@ -28,6 +28,19 @@ const CardTable = defineAsyncComponent(() =>
   import("../../components/Cards/CardTable.vue")
 );
 
+const formatDate = (dateString) => {
+  console.log(dateString);
+  const date = new Date(dateString);
+  const options = {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  return date.toLocaleDateString("en-GB", options).replace(",", "");
+};
+
 const t1 = "Payment Receipt";
 const t2 = "QR Codes Generated";
 
@@ -46,7 +59,7 @@ const columns1 = [
     name: "date_created",
     align: "center",
     label: "Date & Time",
-    field: "date_created",
+    field: (row) => formatDate(row.date_created),
     sortable: true,
   },
   {
