@@ -31,14 +31,6 @@
                 </q-td>
               </template>
             </q-table>
-            <q-pagination
-              v-if="totalPages > 1"
-              v-model="localCurrentPage"
-              :min="1"
-              :max="totalPages"
-              :max-pages="5"
-              @update:model-value="pageChanged"
-            />
             <div v-else class="no-data">
               <img
                 src="../../assets/img/svg/empty.svg"
@@ -48,6 +40,14 @@
                 <strong>There is no data in the table.</strong>
               </div>
             </div>
+            <q-pagination
+              v-if="totalPages > 1"
+              v-model="localCurrentPage"
+              :min="1"
+              :max="totalPages"
+              :max-pages="5"
+              @update:model-value="pageChanged"
+            />
           </div>
         </div>
       </div>
@@ -104,7 +104,6 @@ const emit = defineEmits(["page-changed"]);
 // Local currentPage state
 const localCurrentPage = ref(props.currentPage);
 
-// Watch for prop changes to sync local state
 watch(
   () => props.currentPage,
   (newPage) => {
@@ -116,8 +115,15 @@ const startDownload = (id, url, event) => {
   event.preventDefault();
   event.stopPropagation();
 
+  if (!progress.value[id]) {
+    progress.value[id] = {
+      loading: false,
+      percentage: 0,
+    };
+  }
+
   if (progress.value[id].loading) {
-    return; // Prevent starting a new download if one is already in progress
+    return;
   }
 
   progress.value[id].loading = true;
@@ -129,10 +135,9 @@ const startDownload = (id, url, event) => {
       clearInterval(intervals.value[id]);
       progress.value[id].loading = false;
 
-      // Create a link element, set the download attribute, and click it to download
       const link = document.createElement("a");
       link.href = url;
-      link.download = ""; // Use appropriate filename if needed
+      link.download = `receipt_${id}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

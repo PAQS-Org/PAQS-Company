@@ -27,10 +27,9 @@ export const useTransactionStore = defineStore("transaction", {
           this.transactions = JSON.parse(storedData);
         } else {
           const response = await getData.getReceipts();
-          console.log(response);
           this.transactions = response.data.results.map((item) => ({
             ...item,
-            download: `<a href="/generate-receipt/${item.id}" target="_blank">Download Receipt</a>`,
+            download: `http://127.0.0.1:8000/payment/receipt/${item.transaction_id}/`,
           }));
           localStorage.setItem(
             "transactionData",
