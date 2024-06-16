@@ -6,106 +6,148 @@
       <div class="flex flex-wrap items-center">
         <div class="relative w-full px-4 max-w-full flex-grow flex-1">
           <h3 class="font-semibold text-base text-blueGray-700">
-            Top 5 Customers of Atona Foods
+            Top Customers
           </h3>
         </div>
         <div
           class="relative w-full px-4 max-w-full flex-grow flex-1 text-right"
         >
-          <button
-            class="bg-indigo-500 text-white
-            active:bg-indigo-600 text-xs font-bold
-            uppercase px-3 py-1 rounded outline-none
-            focus:outline-none mr-1 mb-1 ease-linear
-            transition-all duration-150"
-            type="button"
+          <q-btn
+            v-if="customz && customz.length > 0"
+            :loading="progress[0].loading"
+            :percentage="progress[0].percentage"
+            color="primary"
+            @click="downloadCustomerReport"
+            style="width: 150px"
           >
-            See all
-          </button>
+            Get Report
+            <template v-slot:loading> Downloading... </template>
+          </q-btn>
         </div>
       </div>
     </div>
     <div class="block w-full overflow-x-auto">
       <!-- Projects table -->
       <q-table
+        v-if="customz && customz.length > 0"
         class="my-sticky-header-column-table"
         :dense="$q.screen.lt.md"
-        :rows="rows"
+        :rows="customz"
         :columns="columns"
         row-key="name"
+        @page-changed="handlePageChange"
+        :current-page="currentPage"
+        :total-pages="totalPages"
       />
+      <div v-else class="no-data">
+        <img src="../../assets/img/svg/empty.svg" alt="No Data Available" />
+        <div class="mt-3">
+          <strong>There is no data in the table.</strong>
+        </div>
+      </div>
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, ref, onBeforeUnmount, onMounted } from "vue";
+import { useTransactionStore } from "../../stores/dataFeed";
+import { useQuasar } from "quasar";
 const columns = [
   {
-    name: 'name',
+    name: "name",
     required: true,
-    label: 'Customer Name',
-    align: 'left',
+    label: "Customer Name",
+    align: "left",
     field: (row) => row.name,
     format: (val) => `${val}`,
     sortable: true,
   },
   {
-    name: 'ttsc', align: 'center', label: 'Total Scan', field: 'ttsc', sortable: true,
+    name: "ttsc",
+    align: "center",
+    label: "Total Scan",
+    field: "ttsc",
+    sortable: true,
   },
   {
-    name: 'ttcomp', label: 'Total Completed', field: 'ttcomp', sortable: true,
+    name: "ttcomp",
+    label: "Total Completed",
+    field: "ttcomp",
+    sortable: true,
   },
   {
-    name: 'tprod', label: 'Top Product Completed', field: 'tprod', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
+    name: "tprod",
+    label: "Top Product Completed",
+    field: "tprod",
+    sortable: true,
+    sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
   },
-
 ];
 
-const rows = [
-  {
-    name: 'Apirigu Chaka Pamas',
-    ttsc: '6,000',
-    ttcomp: '5,802',
-    tprod: 'Special Ice Water',
-  },
-  {
-    name: 'Robert Akorful',
-    ttsc: '5,754',
-    ttcomp: '5,324',
-    tprod: 'This way Chocolate Drink',
-  },
-  {
-    name: 'Kpanlogo Adanse',
-    ttsc: '5,632',
-    ttcomp: '5,630',
-    tprod: 'Neat Fufu',
-  },
-  {
-    name: 'Alex Agbo',
-    ttsc: '5, 270',
-    ttcomp: '5,220',
-    tprod: 'Neat Koko',
-  },
-  {
-    name: 'Kumchacha Paul',
-    ttsc: '4, 920',
-    ttcomp: '4, 800',
-    tprod: 'Neat Abenkwan',
-  },
+const $q = useQuasar();
 
-];
+const customers = useTransactionStore();
 
-export default {
-  components: {
-    // TableDropdown,
-  },
-  data() {
-    return {
-      columns,
-      rows,
-    };
-  },
+const progress = ref([{ loading: false, percentage: 0 }]);
+
+const intervals = [null];
+
+const startComputing = (id) => {
+  progress.value[id].loading = true;
+  progress.value[id].percentage = 0;
+
+  intervals[id] = setInterval(() => {
+    progress.value[id].percentage += Math.floor(Math.random() * 8 + 10);
+    if (progress.value[id].percentage >= 100) {
+      clearInterval(intervals[id]);
+      progress.value[id].loading = false;
+    }
+  }, 700);
 };
+
+const downloadCustomerReport = async () => {
+  startComputing(0);
+  try {
+    const response = await customers.downloadCustomerReport();
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "report.pdf";
+    link.click();
+    URL.revokeObjectURL(link.href);
+    $q.notify({
+      type: "positive",
+      message: "Report downloaded successfully",
+    });
+  } catch (error) {
+    console.error("Error downloading report:", error);
+    $q.notify({
+      type: "negative",
+      message: "Failed to download report",
+    });
+  }
+};
+
+const customz = computed(() => customers.paginatedCustomers);
+
+const currentPage = computed(() => customers.currentPageCust);
+const totalPages = computed(() => customers.totalCustomers);
+
+const handlePageChange = (page) => {
+  customers.setCurrentPageCust(page);
+};
+
+onMounted(() => {
+  customers.fetchLoyalCust();
+});
+
+onBeforeUnmount(() => {
+  intervals.forEach((val) => {
+    clearInterval(val);
+  });
+});
 </script>
+
 <style lang="sass">
 .my-sticky-header-column-table
   /* height or max-height is important */
@@ -145,4 +187,14 @@ export default {
   td:first-child, th:first-child
     position: sticky
     left: 0
+
+.no-data
+  display: flex
+  justify-content: center
+  align-items: center
+  flex-direction: column
+  height: 300px
+  img
+    max-width: 20%
+    height: auto
 </style>

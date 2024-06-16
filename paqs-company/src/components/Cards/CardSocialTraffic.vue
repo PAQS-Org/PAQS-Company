@@ -12,100 +12,144 @@
         <div
           class="relative w-full px-4 max-w-full flex-grow flex-1 text-right"
         >
-          <button
-            class="bg-indigo-500 text-white
-            active:bg-indigo-600 text-xs font-bold
-            uppercase px-3 py-1 rounded outline-none
-            focus:outline-none mr-1 mb-1 ease-linear
-            transition-all duration-150"
-            type="button"
+          <q-btn
+            v-if="trendz && trendz.length > 0"
+            :loading="progress[0].loading"
+            :percentage="progress[0].percentage"
+            color="primary"
+            @click="downloadReport"
+            style="width: 150px"
           >
-            See all
-          </button>
+            Get Report
+            <template v-slot:loading> Downloading... </template>
+          </q-btn>
         </div>
       </div>
     </div>
     <div class="block w-full overflow-x-auto">
       <!-- Projects table -->
       <q-table
-        class="my-sticky-header-column-table"
+        v-if="trendz && trendz.length > 0"
+        class="my-sticky-header-table"
         :dense="$q.screen.lt.md"
-        :rows="rows"
+        :rows="trendz"
         :columns="columns"
         row-key="name"
+        @page-changed="handlePageChange"
+        :current-page="currentPage"
+        :total-pages="totalPages"
       />
+      <div v-else class="no-data">
+        <img src="../../assets/img/svg/empty.svg" alt="No Data Available" />
+        <div class="mt-3">
+          <strong>There is no data in the table.</strong>
+        </div>
+      </div>
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, ref, onBeforeUnmount, onMounted } from "vue";
+import { useTransactionStore } from "../../stores/dataFeed";
+
+defineOptions({
+  name: "socialTraffic",
+});
+
+const traffic = useTransactionStore();
+
+const progress = ref([{ loading: false, percentage: 0 }]);
+
+const intervals = [null];
+
+const startComputing = (id) => {
+  progress.value[id].loading = true;
+  progress.value[id].percentage = 0;
+
+  intervals[id] = setInterval(() => {
+    progress.value[id].percentage += Math.floor(Math.random() * 8 + 10);
+    if (progress.value[id].percentage >= 100) {
+      clearInterval(intervals[id]);
+      progress.value[id].loading = false;
+    }
+  }, 700);
+};
+
+const downloadReport = async () => {
+  startComputing(0);
+  try {
+    const response = await traffic.downloadReport();
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "report.pdf";
+    link.click();
+    URL.revokeObjectURL(link.href);
+    $q.notify({
+      type: "positive",
+      message: "Report downloaded successfully",
+    });
+  } catch (error) {
+    console.error("Error downloading report:", error);
+    $q.notify({
+      type: "negative",
+      message: "Failed to download report",
+    });
+  }
+};
+
+onBeforeUnmount(() => {
+  intervals.forEach((val) => {
+    clearInterval(val);
+  });
+});
+
 const columns = [
   {
-    name: 'name',
+    name: "name",
     required: true,
-    label: 'Product',
-    align: 'left',
+    label: "Product",
+    align: "left",
     field: (row) => row.name,
     format: (val) => `${val}`,
     sortable: true,
   },
   {
-    name: 'ttsc', align: 'center', label: 'Total Scan', field: 'ttsc', sortable: true,
+    name: "ttsc",
+    align: "center",
+    label: "Total Scan",
+    field: "ttsc",
+    sortable: true,
   },
   {
-    name: 'ttcomp', label: 'Total Completed', field: 'ttcomp', sortable: true,
+    name: "ttcomp",
+    label: "Total Completed",
+    field: "ttcomp",
+    sortable: true,
   },
   {
-    name: 'perChange', label: '% Change (Per Day)', field: 'perChange', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
+    name: "perChange",
+    label: "% Change (Per Day)",
+    field: "perChange",
+    sortable: true,
+    sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
   },
-
 ];
 
-const rows = [
-  {
-    name: 'Special Ice Water',
-    ttsc: '6,000',
-    ttcomp: '5,802',
-    perChange: '14%',
-  },
-  {
-    name: 'This way Chocolate Drink',
-    ttsc: '5,754',
-    ttcomp: '5,324',
-    perChange: '2%',
-  },
-  {
-    name: 'Neat Fufu',
-    ttsc: '5,632',
-    ttcomp: '5,630',
-    perChange: '6%',
-  },
-  {
-    name: 'Neat Koko',
-    ttsc: '5, 270',
-    ttcomp: '5,220',
-    perChange: '2%',
-  },
-  {
-    name: 'Neat Abenkwan',
-    ttsc: '4, 920',
-    ttcomp: '4, 800',
-    perChange: '8%',
-  },
+const trendz = computed(() => traffic.paginatedTrendz);
 
-];
+const currentPage = computed(() => traffic.currentPageTrendz);
+const totalPages = computed(() => traffic.totalPageTrendzs);
 
-export default {
-  components: {
-    // TableDropdown,
-  },
-  data() {
-    return {
-      columns,
-      rows,
-    };
-  },
+const handlePageChange = (page) => {
+  traffic.setCurrentPageTrendz(page);
 };
+
+onMounted(() => {
+  traffic.fetchTrends();
+});
 </script>
+
 <style lang="sass">
 .my-sticky-header-table
   /* height or max-height is important */
@@ -127,4 +171,14 @@ export default {
   &.q-table--loading thead tr:last-child th
     /* height of all previous header rows */
     top: 48px
+
+.no-data
+  display: flex
+  justify-content: center
+  align-items: center
+  flex-direction: column
+  height: 300px
+  img
+    max-width: 20%
+    height: auto
 </style>
