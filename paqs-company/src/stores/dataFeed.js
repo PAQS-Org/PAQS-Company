@@ -4,6 +4,12 @@ import getData from "src/api/getData.js";
 
 export const useTransactionStore = defineStore("transaction", {
   state: () => ({
+    lineChartData: JSON.parse(localStorage.getItem("chartData")) || [],
+    lineChartrange: {
+      year: new Date().getFullYear(),
+      month: null,
+      day: null,
+    },
     loyalCust: [],
     trendProducts: [],
     transactions: [],
@@ -38,6 +44,17 @@ export const useTransactionStore = defineStore("transaction", {
     },
     totalCustomers: (state) => {
       return Math.ceil(state.loyalCust.length / state.pageSizeCust);
+    },
+    filteredData(state) {
+      const { year, month, day } = state.lineChartrange;
+      return state.lineChartData.filter((item) => {
+        const date = new Date(item.date);
+        return (
+          date.getFullYear() === year &&
+          (month === null || date.getMonth() === month) &&
+          (day === null || date.getDate() === day)
+        );
+      });
     },
   },
   actions: {
@@ -109,6 +126,21 @@ export const useTransactionStore = defineStore("transaction", {
         console.error("Error fetching trend products data:", error);
       }
     },
+    async fetchData() {
+      try {
+        const response = await axios.get("https://api.example.com/chart-data"); // Replace with your backend endpoint
+        this.lineChartData = response.data;
+        localStorage.setItem(
+          "lineChartData",
+          JSON.stringify(this.lineChartData)
+        );
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      }
+    },
+    updateRange(range) {
+      this.lineChartrange = range;
+    },
     async downloadReport() {
       try {
         const response = await getData.getReport(); // Assuming getReport fetches the file from backend
@@ -120,7 +152,7 @@ export const useTransactionStore = defineStore("transaction", {
     },
     async downloadCustomerReport() {
       try {
-        const response = await getData.getCustomerReport(); // Assuming getReport fetches the file from backend
+        const response = getData.getCustomerReport(); // Assuming getReport fetches the file from backend
         return response;
       } catch (error) {
         console.error("Error downloading report:", error);
