@@ -10,5 +10,7 @@ const getData = {
   getCustomerReport() {
     $axios.get("/api/report", { responseType: "blob" });
   },
+  // Line Chart
+  getLineChart: (data) => $axios.get("chart-data/ine/", data),
 };
 export default getData;

@@ -67,7 +67,6 @@ export const useAuthStore = defineStore("auth", {
     async logins(credentials) {
       try {
         const res = await AUTH.login(credentials);
-        console.log(res);
         if (res.status === 200) {
           const baseURL = "http://127.0.0.1:8000";
           const userDetails = {

@@ -14,123 +14,121 @@
         </div>
       </div>
     </div>
+    <div class="px-4 py-2">
+      <label for="timeframe" class="text-white mr-2">Select Timeframe:</label>
+      <select
+        id="timeframe"
+        v-model="selectedTimeframe"
+        @change="updateTimeframe"
+      >
+        <option value="year">Year</option>
+        <option value="month">Month</option>
+        <option value="day">Day</option>
+      </select>
+    </div>
     <div class="p-4 flex-auto">
       <!-- Chart -->
       <div class="relative h-350-px">
-        <canvas ref="line-chart" />
+        <canvas ref="lineChart" />
       </div>
     </div>
   </div>
 </template>
-<script>
-import { Chart } from "chart.js/auto";
+<script setup>
+import { ref, onMounted, watch } from "vue";
+import "chartjs-adapter-date-fns";
+import { enUS } from "date-fns/locale";
+import Chart from "chart.js/auto";
+import { useTransactionStore } from "src/stores/dataFeed";
 
-export default {
-  mounted() {
-    this.$nextTick(() => {
-      const config = {
-        type: "line",
-        data: {
-          labels: [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-          ],
-          datasets: [
-            {
-              label: new Date().getFullYear(),
-              backgroundColor: "#4c51bf",
-              borderColor: "#4c51bf",
-              data: [65, 78, 66, 44, 56, 67, 75],
-              fill: false,
-            },
-            {
-              label: new Date().getFullYear() - 1,
-              fill: false,
-              backgroundColor: "#fff",
-              borderColor: "#fff",
-              data: [40, 68, 86, 74, 56, 60, 87],
-            },
-          ],
+const lineChart = ref("line-chart");
+const lineData = useTransactionStore();
+const selectedTimeframe = ref("year");
+let chartInstance = null;
+
+const createChart = () => {
+  const ctx = lineChart.value.getContext("2d");
+
+  const data = lineData.filteredLineData;
+
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  const config = {
+    type: "line",
+    data: {
+      labels: data.map((item) => item.label),
+      datasets: [
+        {
+          label: lineData.lineChartrange.year,
+          backgroundColor: "#4c51bf",
+          borderColor: "#4c51bf",
+          data: data.map((item) => item.value),
+          fill: false,
         },
-        options: {
-          maintainAspectRatio: false,
-          responsive: true,
-          title: {
+      ],
+    },
+    options: {
+      maintainAspectRatio: false,
+      responsive: true,
+      scales: {
+        x: {
+          type: "category",
+
+          adapters: {
+            date: {
+              locale: enUS,
+            },
+          },
+          ticks: {
+            color: "rgba(255,255,255,.7)",
+          },
+          grid: {
             display: false,
-            text: "Sales Charts",
-            fontColor: "white",
-          },
-          legend: {
-            labels: {
-              fontColor: "white",
-            },
-            align: "end",
-            position: "bottom",
-          },
-          tooltips: {
-            mode: "index",
-            intersect: false,
-          },
-          hover: {
-            mode: "nearest",
-            intersect: true,
-          },
-          scales: {
-            xAxes: [
-              {
-                ticks: {
-                  fontColor: "rgba(255,255,255,.7)",
-                },
-                display: true,
-                scaleLabel: {
-                  display: false,
-                  labelString: "Month",
-                  fontColor: "white",
-                },
-                gridLines: {
-                  display: false,
-                  borderDash: [2],
-                  borderDashOffset: [2],
-                  color: "rgba(33, 37, 41, 0.3)",
-                  zeroLineColor: "rgba(0, 0, 0, 0)",
-                  zeroLineBorderDash: [2],
-                  zeroLineBorderDashOffset: [2],
-                },
-              },
-            ],
-            yAxes: [
-              {
-                ticks: {
-                  fontColor: "rgba(255,255,255,.7)",
-                },
-                display: true,
-                scaleLabel: {
-                  display: false,
-                  labelString: "Value",
-                  fontColor: "white",
-                },
-                gridLines: {
-                  borderDash: [3],
-                  borderDashOffset: [3],
-                  drawBorder: false,
-                  color: "rgba(255, 255, 255, 0.15)",
-                  zeroLineColor: "rgba(33, 37, 41, 0)",
-                  zeroLineBorderDash: [2],
-                  zeroLineBorderDashOffset: [2],
-                },
-              },
-            ],
+            color: "rgba(33, 37, 41, 0.3)",
           },
         },
-      };
-      const ctx = document.getElementById("line-chart").getContext("2d");
-      window.myLine = new Chart(ctx, config);
-    });
-  },
+        y: {
+          ticks: {
+            color: "rgba(255,255,255,.7)",
+          },
+          grid: {
+            color: "rgba(255, 255, 255, 0.15)",
+          },
+        },
+      },
+    },
+  };
+
+  chartInstance = new Chart(ctx, config);
 };
+
+const updateTimeframe = () => {
+  const now = new Date();
+  const newRange = { year: now.getFullYear(), month: null, day: null };
+
+  if (selectedTimeframe.value === "month") {
+    newRange.month = now.getMonth();
+  } else if (selectedTimeframe.value === "day") {
+    newRange.month = now.getMonth() + 1;
+    newRange.day = now.getDate();
+  }
+
+  lineData.updateRange(newRange);
+};
+
+onMounted(async () => {
+  await lineData.fetchLineData();
+  createChart();
+});
+
+watch(
+  () => lineData.filteredLineData,
+  () => {
+    createChart();
+    console.log("Filtered Line Data:", lineData.filteredLineData);
+  },
+  { deep: true }
+);
 </script>

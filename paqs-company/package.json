@@ -20,6 +20,8 @@
     "@vuelidate/validators": "^2.0.4",
     "axios": "^1.2.1",
     "chart.js": "^4.4.3",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "date-fns": "^3.6.0",
     "dayjs": "^1.11.11",
     "hellojs": "^1.20.0",
     "jwt-decode": "^4.0.0",

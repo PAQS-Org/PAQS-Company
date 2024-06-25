@@ -74,10 +74,10 @@ export default async ({ router }) => {
 
         const refreshTokenExpTime = dayjs.unix(jwtDecode(refreshTokens).exp);
 
-        console.log("user", user);
-        console.log("accessExpTime", accessExpTime);
-        console.log("now", now);
-        console.log("refreshTokenExpTime", refreshTokenExpTime);
+        // console.log("user", user);
+        // console.log("accessExpTime", accessExpTime);
+        // console.log("now", now);
+        // console.log("refreshTokenExpTime", refreshTokenExpTime);
 
         // Refresh the access token if it will expire in the next minute and the user is active
         if (accessExpTime.diff(now, "minute") <= 1 && userIsActive) {

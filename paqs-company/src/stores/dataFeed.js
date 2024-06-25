@@ -4,7 +4,31 @@ import getData from "src/api/getData.js";
 
 export const useTransactionStore = defineStore("transaction", {
   state: () => ({
-    lineChartData: JSON.parse(localStorage.getItem("chartData")) || [],
+    lineChartData: JSON.parse(localStorage.getItem("lineChartData")) || [
+      { date: "2024-01-01", label: "January", value: 65 },
+      { date: "2024-02-01", label: "February", value: 78 },
+      { date: "2024-03-01", label: "March", value: 66 },
+      { date: "2024-04-01", label: "April", value: 44 },
+      { date: "2024-05-01", label: "May", value: 56 },
+      { date: "2024-06-01", label: "June", value: 67 },
+      { date: "2024-07-01", label: "July", value: 75 },
+      { date: "2023-01-01", label: "January", value: 13 },
+      { date: "2023-02-01", label: "February", value: 96 },
+      { date: "2023-03-01", label: "March", value: 45 },
+      { date: "2023-04-01", label: "April", value: 49 },
+      { date: "2023-05-01", label: "May", value: 33 },
+      { date: "2023-06-01", label: "June", value: 29 },
+      { date: "2023-07-01", label: "July", value: 75 },
+      { date: "2022-01-01", label: "January", value: 40 },
+      { date: "2022-02-01", label: "February", value: 68 },
+      { date: "2022-03-01", label: "March", value: 86 },
+      { date: "2022-04-01", label: "April", value: 74 },
+      { date: "2022-05-01", label: "May", value: 56 },
+      { date: "2022-06-01", label: "June", value: 60 },
+      { date: "2022-07-01", label: "July", value: 87 },
+    ],
+    // lineChartData: JSON.parse(localStorage.getItem("lineChartData")) || [],
+
     lineChartrange: {
       year: new Date().getFullYear(),
       month: null,
@@ -45,7 +69,7 @@ export const useTransactionStore = defineStore("transaction", {
     totalCustomers: (state) => {
       return Math.ceil(state.loyalCust.length / state.pageSizeCust);
     },
-    filteredData(state) {
+    filteredLineData(state) {
       const { year, month, day } = state.lineChartrange;
       return state.lineChartData.filter((item) => {
         const date = new Date(item.date);
@@ -126,16 +150,16 @@ export const useTransactionStore = defineStore("transaction", {
         console.error("Error fetching trend products data:", error);
       }
     },
-    async fetchData() {
+    async fetchLineData() {
       try {
-        const response = await axios.get("https://api.example.com/chart-data"); // Replace with your backend endpoint
+        const response = await getData.getLineChart(); // Replace with your backend endpoint
         this.lineChartData = response.data;
         localStorage.setItem(
           "lineChartData",
           JSON.stringify(this.lineChartData)
         );
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        console.error("Failed to fetch line data:", error);
       }
     },
     updateRange(range) {
@@ -152,7 +176,7 @@ export const useTransactionStore = defineStore("transaction", {
     },
     async downloadCustomerReport() {
       try {
-        const response = getData.getCustomerReport(); // Assuming getReport fetches the file from backend
+        const response = await getData.getCustomerReport(); // Assuming getReport fetches the file from backend
         return response;
       } catch (error) {
         console.error("Error downloading report:", error);

@@ -145,8 +145,8 @@ const handlePageChange = (page) => {
   traffic.setCurrentPageTrendz(page);
 };
 
-onMounted(() => {
-  traffic.fetchTrends();
+onMounted(async () => {
+  // await traffic.fetchTrends();
 });
 </script>
 

@@ -68,7 +68,6 @@ export const useProdStore = defineStore({
   actions: {
     setCompanyName(companyName) {
       this.companyName = companyName;
-      console.log(companyName);
     },
     setStep(step) {
       this.step = step;
