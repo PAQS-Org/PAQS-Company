@@ -31,6 +31,7 @@
       </div>
       <div>
         <q-select
+          bg-color="white"
           transition-show="jump-up"
           transition-hide="jump-up"
           v-model="selectedMonth"
@@ -58,14 +59,11 @@ import { enUS } from "date-fns/locale";
 import Chart from "chart.js/auto";
 import { useTransactionStore } from "src/stores/dataFeed";
 
-const lineChart = ref(null);
+const lineChart = ref("line-chart");
 const lineData = useTransactionStore();
 const selectedYear = ref(null);
 const selectedMonth = ref(null);
 let chartInstance = null;
-
-console.log("Selected Month-111:", selectedMonth.value);
-console.log("Selected Year-111:", selectedYear.value);
 
 const months = [
   "January",
@@ -86,7 +84,7 @@ const yearOptions = computed(() => {
   return lineData.lineChartData
     .map((item) => new Date(item.date).getFullYear())
     .filter((value, index, self) => self.indexOf(value) === index)
-    .sort((a, b) => a - b); // Ensure the years are sorted in ascending order
+    .sort((a, b) => a - b);
 });
 
 const monthOptions = months.map((month, index) => ({
@@ -97,10 +95,6 @@ const monthOptions = months.map((month, index) => ({
 const filteredData = computed(() => {
   const year = selectedYear.value ? parseInt(selectedYear.value) : null;
   const month = selectedMonth.value !== null ? selectedMonth.value.value : null;
-
-  console.log("Selected Year:", year);
-  console.log("black:", selectedMonth.value);
-  console.log("Selected Month:", month);
 
   const lineFiltered = lineData.lineChartData
     .filter((item) => {
@@ -129,9 +123,6 @@ const filteredData = computed(() => {
       return true;
     }
   }).sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  console.log("Filtered Line Data:", lineFiltered);
-  console.log("Filtered Completed Data:", completedFiltered);
 
   return { lineFiltered, completedFiltered };
 });
@@ -163,21 +154,14 @@ const createChart = () => {
           label: "Total Scans",
           backgroundColor: "#4c51bf",
           borderColor: "#4c51bf",
-          data: lineFiltered.map((item) => {
-            const value = item.value;
-            return isNaN(value) ? 0 : value; // Handle NaN values
-          }),
+          data: lineFiltered.map((item) => item.value),
           fill: false,
         },
         {
           label: "Completed Scans",
           backgroundColor: "#ff6384",
           borderColor: "#ff6384",
-          // data: completedFiltered.map((item) => item.value),
-          data: completedFiltered.map((item) => {
-            const value = item.value;
-            return isNaN(value) ? 0 : value; // Handle NaN values
-          }),
+          data: completedFiltered.map((item) => item.value),
           fill: false,
         },
       ],
