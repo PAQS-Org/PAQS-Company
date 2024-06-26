@@ -14,18 +14,35 @@
         </div>
       </div>
     </div>
-    <div class="px-4 py-2">
-      <label for="timeframe" class="text-white mr-2">Select Timeframe:</label>
-      <select
-        id="timeframe"
-        v-model="selectedTimeframe"
-        @change="updateTimeframe"
-      >
-        <option value="year">Year</option>
-        <option value="month">Month</option>
-        <option value="day">Day</option>
-      </select>
+    <div class="px-4 py-2 flex inline">
+      <h4 class="mr-2 text-white">Select the year and month:</h4>
+      <div class="mr-4">
+        <q-select
+          bg-color="white"
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          v-model="selectedYear"
+          :options="yearOptions"
+          label="Year"
+          style="width: 150px"
+          clearable
+          @update:model-value="updateChart"
+        />
+      </div>
+      <div>
+        <q-select
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          v-model="selectedMonth"
+          :options="monthOptions"
+          label="Month"
+          style="width: 150px"
+          clearable
+          @update:model-value="updateChart"
+        />
+      </div>
     </div>
+
     <div class="p-4 flex-auto">
       <!-- Chart -->
       <div class="relative h-350-px">
@@ -35,36 +52,132 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import "chartjs-adapter-date-fns";
 import { enUS } from "date-fns/locale";
 import Chart from "chart.js/auto";
 import { useTransactionStore } from "src/stores/dataFeed";
 
-const lineChart = ref("line-chart");
+const lineChart = ref(null);
 const lineData = useTransactionStore();
-const selectedTimeframe = ref("year");
+const selectedYear = ref(null);
+const selectedMonth = ref(null);
 let chartInstance = null;
 
+console.log("Selected Month-111:", selectedMonth.value);
+console.log("Selected Year-111:", selectedYear.value);
+
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const yearOptions = computed(() => {
+  return lineData.lineChartData
+    .map((item) => new Date(item.date).getFullYear())
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .sort((a, b) => a - b); // Ensure the years are sorted in ascending order
+});
+
+const monthOptions = months.map((month, index) => ({
+  label: month,
+  value: index,
+}));
+
+const filteredData = computed(() => {
+  const year = selectedYear.value ? parseInt(selectedYear.value) : null;
+  const month = selectedMonth.value !== null ? selectedMonth.value.value : null;
+
+  console.log("Selected Year:", year);
+  console.log("black:", selectedMonth.value);
+  console.log("Selected Month:", month);
+
+  const lineFiltered = lineData.lineChartData
+    .filter((item) => {
+      const date = new Date(item.date);
+      if (year !== null && month !== null) {
+        return date.getFullYear() === year && date.getMonth() === month;
+      } else if (year !== null) {
+        return date.getFullYear() === year;
+      } else if (month !== null) {
+        return date.getMonth() === month;
+      } else {
+        return true;
+      }
+    })
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const completedFiltered = lineData.CompletedChartData.filter((item) => {
+    const date = new Date(item.date);
+    if (year !== null && month !== null) {
+      return date.getFullYear() === year && date.getMonth() === month;
+    } else if (year !== null) {
+      return date.getFullYear() === year;
+    } else if (month !== null) {
+      return date.getMonth() === month;
+    } else {
+      return true;
+    }
+  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  console.log("Filtered Line Data:", lineFiltered);
+  console.log("Filtered Completed Data:", completedFiltered);
+
+  return { lineFiltered, completedFiltered };
+});
+
+const xLabels = computed(() => {
+  const { lineFiltered } = filteredData.value;
+  return lineFiltered.map(
+    (item) =>
+      `${months[new Date(item.date).getMonth()]} ${new Date(
+        item.date
+      ).getFullYear()}`
+  );
+});
 const createChart = () => {
   const ctx = lineChart.value.getContext("2d");
-
-  const data = lineData.filteredLineData;
 
   if (chartInstance) {
     chartInstance.destroy();
   }
 
+  const { lineFiltered, completedFiltered } = filteredData.value;
+
   const config = {
     type: "line",
     data: {
-      labels: data.map((item) => item.label),
+      labels: xLabels.value,
       datasets: [
         {
-          label: lineData.lineChartrange.year,
+          label: "Total Scans",
           backgroundColor: "#4c51bf",
           borderColor: "#4c51bf",
-          data: data.map((item) => item.value),
+          data: lineFiltered.map((item) => {
+            const value = item.value;
+            return isNaN(value) ? 0 : value; // Handle NaN values
+          }),
+          fill: false,
+        },
+        {
+          label: "Completed Scans",
+          backgroundColor: "#ff6384",
+          borderColor: "#ff6384",
+          // data: completedFiltered.map((item) => item.value),
+          data: completedFiltered.map((item) => {
+            const value = item.value;
+            return isNaN(value) ? 0 : value; // Handle NaN values
+          }),
           fill: false,
         },
       ],
@@ -75,7 +188,6 @@ const createChart = () => {
       scales: {
         x: {
           type: "category",
-
           adapters: {
             date: {
               locale: enUS,
@@ -104,31 +216,20 @@ const createChart = () => {
   chartInstance = new Chart(ctx, config);
 };
 
-const updateTimeframe = () => {
-  const now = new Date();
-  const newRange = { year: now.getFullYear(), month: null, day: null };
-
-  if (selectedTimeframe.value === "month") {
-    newRange.month = now.getMonth();
-  } else if (selectedTimeframe.value === "day") {
-    newRange.month = now.getMonth() + 1;
-    newRange.day = now.getDate();
-  }
-
-  lineData.updateRange(newRange);
-};
-
 onMounted(async () => {
   await lineData.fetchLineData();
+  await lineData.fetchCompletedData();
   createChart();
 });
 
+const updateChart = () => {
+  createChart();
+};
+
 watch(
-  () => lineData.filteredLineData,
+  () => [selectedYear.value, selectedMonth.value],
   () => {
-    createChart();
-    console.log("Filtered Line Data:", lineData.filteredLineData);
-  },
-  { deep: true }
+    updateChart();
+  }
 );
 </script>

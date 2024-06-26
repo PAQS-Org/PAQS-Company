@@ -7,6 +7,9 @@ export const useTransactionStore = defineStore("transaction", {
     lineChartData: JSON.parse(localStorage.getItem("lineChartData")) || [
       { date: "2024-01-01", label: "January", value: 65 },
       { date: "2024-02-01", label: "February", value: 78 },
+      { date: "2024-02-08", label: "February", value: 38 },
+      { date: "2024-02-10", label: "February", value: 69 },
+      { date: "2024-02-12", label: "February", value: 33 },
       { date: "2024-03-01", label: "March", value: 66 },
       { date: "2024-04-01", label: "April", value: 44 },
       { date: "2024-05-01", label: "May", value: 56 },
@@ -21,11 +24,39 @@ export const useTransactionStore = defineStore("transaction", {
       { date: "2023-07-01", label: "July", value: 75 },
       { date: "2022-01-01", label: "January", value: 40 },
       { date: "2022-02-01", label: "February", value: 68 },
+      { date: "2022-02-03", label: "February", value: 96 },
       { date: "2022-03-01", label: "March", value: 86 },
       { date: "2022-04-01", label: "April", value: 74 },
       { date: "2022-05-01", label: "May", value: 56 },
       { date: "2022-06-01", label: "June", value: 60 },
       { date: "2022-07-01", label: "July", value: 87 },
+    ],
+    CompletedChartData: JSON.parse(localStorage.getItem("lineChartData")) || [
+      { date: "2024-01-01", label: "January", value: 25 },
+      { date: "2024-02-01", label: "February", value: 33 },
+      { date: "2024-02-08", label: "February", value: 69 },
+      { date: "2024-02-10", label: "February", value: 37 },
+      { date: "2024-02-12", label: "February", value: 47 },
+      { date: "2024-03-01", label: "March", value: 93 },
+      { date: "2024-04-01", label: "April", value: 85 },
+      { date: "2024-05-01", label: "May", value: 62 },
+      { date: "2024-06-01", label: "June", value: 42 },
+      { date: "2024-07-01", label: "July", value: 47 },
+      { date: "2023-01-01", label: "January", value: 59 },
+      { date: "2023-02-01", label: "February", value: 34 },
+      { date: "2023-03-01", label: "March", value: 62 },
+      { date: "2023-04-01", label: "April", value: 81 },
+      { date: "2023-05-01", label: "May", value: 69 },
+      { date: "2023-06-01", label: "June", value: 12 },
+      { date: "2023-07-01", label: "July", value: 19 },
+      { date: "2022-01-01", label: "January", value: 67 },
+      { date: "2022-02-01", label: "February", value: 44 },
+      { date: "2022-02-03", label: "February", value: 58 },
+      { date: "2022-03-01", label: "March", value: 73 },
+      { date: "2022-04-01", label: "April", value: 28 },
+      { date: "2022-05-01", label: "May", value: 92 },
+      { date: "2022-06-01", label: "June", value: 33 },
+      { date: "2022-07-01", label: "July", value: 18 },
     ],
     // lineChartData: JSON.parse(localStorage.getItem("lineChartData")) || [],
 
@@ -69,14 +100,26 @@ export const useTransactionStore = defineStore("transaction", {
     totalCustomers: (state) => {
       return Math.ceil(state.loyalCust.length / state.pageSizeCust);
     },
+
     filteredLineData(state) {
-      const { year, month, day } = state.lineChartrange;
+      const year = state.lineChartrange.year;
+      const month = state.lineChartrange.month;
       return state.lineChartData.filter((item) => {
         const date = new Date(item.date);
         return (
-          date.getFullYear() === year &&
-          (month === null || date.getMonth() === month) &&
-          (day === null || date.getDate() === day)
+          (year ? date.getFullYear() === year : true) &&
+          (month !== null ? date.getMonth() === month : true)
+        );
+      });
+    },
+    filteredCompletedData(state) {
+      const year = state.lineChartrange.year;
+      const month = state.lineChartrange.month;
+      return state.CompletedChartData.filter((item) => {
+        const date = new Date(item.date);
+        return (
+          (year ? date.getFullYear() === year : true) &&
+          (month !== null ? date.getMonth() === month : true)
         );
       });
     },
@@ -162,8 +205,21 @@ export const useTransactionStore = defineStore("transaction", {
         console.error("Failed to fetch line data:", error);
       }
     },
+    async fetchCompletedData() {
+      try {
+        const response = await getData.getCompletedChart(); // Replace with your backend endpoint
+        this.CompletedChartData = response.data;
+        localStorage.setItem(
+          "CompletedChartData",
+          JSON.stringify(this.CompletedChartData)
+        );
+      } catch (error) {
+        console.error("Failed to fetch completed data:", error);
+      }
+    },
     updateRange(range) {
-      this.lineChartrange = range;
+      this.lineChartrange.year = range.year;
+      this.lineChartrange.month = range.month;
     },
     async downloadReport() {
       try {
