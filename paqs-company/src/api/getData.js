@@ -11,7 +11,10 @@ const getData = {
     $axios.get("/api/report", { responseType: "blob" });
   },
   // Line Chart
-  getLineChart: (data) => $axios.get("chart-data/line/", data),
-  getCompletedChart: (data) => $axios.get("chart-data/completed/", data),
+  getLineChart: (data) => $axios.get("chart-data/line-scan/", data),
+  getCompletedChart: (data) => $axios.get("chart-data/line-completed/", data),
+  //  Bar chart
+  getBarScanChart: (data) => $axios.get("chart-data/bar-scan/", data),
+  getBarCompleteChart: (data) => $axios.get("chart-data/bar-completed/", data),
 };
 export default getData;
