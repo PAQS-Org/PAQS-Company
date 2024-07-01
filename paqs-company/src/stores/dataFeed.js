@@ -4,533 +4,13 @@ import getData from "src/api/getData.js";
 
 export const useTransactionStore = defineStore("transaction", {
   state: () => ({
-    BarScanChartData: JSON.parse(localStorage.getItem("lineChartData")) || [
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "nshornaa",
-        locality: "kwaa",
-        value: 2,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "town park",
-        locality: "hwe",
-        value: 5,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "Church road",
-        locality: "rws",
-        value: 3,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "kingsway",
-        locality: "kik",
-        value: 10,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Teshie",
-        town: "Tweibleoo",
-        locality: "hay",
-        value: 12,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Teshie",
-        town: "Park O",
-        locality: "hh",
-        value: 5,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Nungua",
-        town: "Beach road",
-        locality: "lal",
-        value: 10,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Nungua",
-        town: "Beach road",
-        locality: "ewa",
-        value: 3,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "School",
-        locality: "kjj",
-        value: 8,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Teshie",
-        town: "kingsway",
-        locality: "jua",
-        value: 4,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Nungua",
-        town: "Senas",
-        locality: "jdf",
-        value: 9,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "Street",
-        locality: "sds",
-        value: 7,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Tafo",
-        town: "mile 3",
-        locality: "swe",
-        value: 12,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Pankros",
-        town: "Atimatim",
-        locality: "rash",
-        value: 7,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Suame",
-        town: "Maakro",
-        locality: "sds",
-        value: 8,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Teshie",
-        town: "Lake",
-        locality: "oio",
-        value: 12,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Kejetia",
-        town: "Station",
-        locality: "uio",
-        value: 12,
-      },
-      {
-        country: "Ghana",
-        region: "Takoradi",
-        city: "Paado",
-        town: "market",
-        locality: "umn",
-        value: 13,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Tafo",
-        town: "mile 3",
-        locality: "kaw",
-        value: 5,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Tema",
-        town: "Comm 5",
-        locality: "chu",
-        value: 10,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Tafo",
-        town: "mile 4",
-        locality: "mja",
-        value: 5,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Tafo",
-        town: "market",
-        locality: "uka",
-        value: 8,
-      },
-      {
-        country: "Ghana",
-        region: "Takoradi",
-        city: "Fijai",
-        town: "town park",
-        locality: "lio",
-        value: 3,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Nungua",
-        town: "Maa mli",
-        locality: "pqa",
-        value: 7,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Pankros",
-        town: "Junction",
-        locality: "site",
-        value: 15,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Tema",
-        town: "Comm 2",
-        locality: "Police",
-        value: 14,
-      },
-      {
-        country: "Ghana",
-        region: "Takoradi",
-        city: "Market Circle",
-        town: "stra",
-        locality: "line",
-        value: 13,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Kejetia",
-        town: "Police",
-        locality: "line 3",
-        value: 15,
-      },
-      {
-        country: "Ghana",
-        region: "Takoradi",
-        city: "Fijai",
-        town: "stadium",
-        locality: "airport",
-        value: 8,
-      },
-    ],
-    BarCompleteChartData: JSON.parse(localStorage.getItem("lineChartData")) || [
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "nshornaa",
-        locality: "kwaa",
-        value: 7,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "town park",
-        locality: "hwe",
-        value: 5,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "Church road",
-        locality: "rws",
-        value: 13,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "kingsway",
-        locality: "kik",
-        value: 14,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Teshie",
-        town: "Tweibleoo",
-        locality: "hay",
-        value: 9,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Teshie",
-        town: "Park O",
-        locality: "hh",
-        value: 8,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Nungua",
-        town: "Beach road",
-        locality: "lal",
-        value: 18,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Nungua",
-        town: "Beach road",
-        locality: "ewa",
-        value: 12,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "School",
-        locality: "kjj",
-        value: 14,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Teshie",
-        town: "kingsway",
-        locality: "jua",
-        value: 6,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Nungua",
-        town: "Senas",
-        locality: "jdf",
-        value: 3,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "labadi",
-        town: "Street",
-        locality: "sds",
-        value: 16,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Tafo",
-        town: "mile 3",
-        locality: "swe",
-        value: 14,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Pankros",
-        town: "Atimatim",
-        locality: "rash",
-        value: 13,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Suame",
-        town: "Maakro",
-        locality: "sds",
-        value: 2,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Teshie",
-        town: "Lake",
-        locality: "oio",
-        value: 11,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Kejetia",
-        town: "Station",
-        locality: "uio",
-        value: 10,
-      },
-      {
-        country: "Ghana",
-        region: "Takoradi",
-        city: "Paado",
-        town: "market",
-        locality: "umn",
-        value: 2,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Tafo",
-        town: "mile 3",
-        locality: "kaw",
-        value: 8,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Tema",
-        town: "Comm 5",
-        locality: "chu",
-        value: 7,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Tafo",
-        town: "mile 4",
-        locality: "mja",
-        value: 5,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Tafo",
-        town: "market",
-        locality: "uka",
-        value: 6,
-      },
-      {
-        country: "Ghana",
-        region: "Takoradi",
-        city: "Fijai",
-        town: "town park",
-        locality: "lio",
-        value: 17,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Nungua",
-        town: "Maa mli",
-        locality: "pqa",
-        value: 2,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Pankros",
-        town: "Junction",
-        locality: "site",
-        value: 16,
-      },
-      {
-        country: "Ghana",
-        region: "Accra",
-        city: "Tema",
-        town: "Comm 2",
-        locality: "Police",
-        value: 10,
-      },
-      {
-        country: "Ghana",
-        region: "Takoradi",
-        city: "Market Circle",
-        town: "stra",
-        locality: "line",
-        value: 2,
-      },
-      {
-        country: "Ghana",
-        region: "Kumasi",
-        city: "Kejetia",
-        town: "Police",
-        locality: "line 3",
-        value: 10,
-      },
-      {
-        country: "Ghana",
-        region: "Takoradi",
-        city: "Fijai",
-        town: "stadium",
-        locality: "airport",
-        value: 9,
-      },
-    ],
-    lineChartData: JSON.parse(localStorage.getItem("lineChartData")) || [
-      { date: "2024-01-01", label: "January", value: 65 },
-      { date: "2024-02-01", label: "February", value: 78 },
-      { date: "2024-02-08", label: "February", value: 38 },
-      { date: "2024-02-10", label: "February", value: 69 },
-      { date: "2024-02-12", label: "February", value: 33 },
-      { date: "2024-03-01", label: "March", value: 66 },
-      { date: "2024-04-01", label: "April", value: 44 },
-      { date: "2024-05-01", label: "May", value: 56 },
-      { date: "2024-06-01", label: "June", value: 67 },
-      { date: "2024-07-01", label: "July", value: 75 },
-      { date: "2023-01-01", label: "January", value: 13 },
-      { date: "2023-02-01", label: "February", value: 96 },
-      { date: "2023-03-01", label: "March", value: 45 },
-      { date: "2023-04-01", label: "April", value: 49 },
-      { date: "2023-05-01", label: "May", value: 33 },
-      { date: "2023-06-01", label: "June", value: 29 },
-      { date: "2023-07-01", label: "July", value: 75 },
-      { date: "2022-01-01", label: "January", value: 40 },
-      { date: "2022-02-01", label: "February", value: 68 },
-      { date: "2022-02-03", label: "February", value: 96 },
-      { date: "2022-03-01", label: "March", value: 86 },
-      { date: "2022-04-01", label: "April", value: 74 },
-      { date: "2022-05-01", label: "May", value: 56 },
-      { date: "2022-06-01", label: "June", value: 60 },
-      { date: "2022-07-01", label: "July", value: 87 },
-    ],
-    CompletedChartData: JSON.parse(localStorage.getItem("lineChartData")) || [
-      { date: "2024-01-01", label: "January", value: 25 },
-      { date: "2024-02-01", label: "February", value: 33 },
-      { date: "2024-02-08", label: "February", value: 69 },
-      { date: "2024-02-10", label: "February", value: 37 },
-      { date: "2024-02-12", label: "February", value: 47 },
-      { date: "2024-03-01", label: "March", value: 93 },
-      { date: "2024-04-01", label: "April", value: 85 },
-      { date: "2024-05-01", label: "May", value: 62 },
-      { date: "2024-06-01", label: "June", value: 42 },
-      { date: "2024-07-01", label: "July", value: 47 },
-      { date: "2023-01-01", label: "January", value: 59 },
-      { date: "2023-02-01", label: "February", value: 34 },
-      { date: "2023-03-01", label: "March", value: 62 },
-      { date: "2023-04-01", label: "April", value: 81 },
-      { date: "2023-05-01", label: "May", value: 69 },
-      { date: "2023-06-01", label: "June", value: 12 },
-      { date: "2023-07-01", label: "July", value: 19 },
-      { date: "2022-01-01", label: "January", value: 67 },
-      { date: "2022-02-01", label: "February", value: 44 },
-      { date: "2022-02-03", label: "February", value: 58 },
-      { date: "2022-03-01", label: "March", value: 73 },
-      { date: "2022-04-01", label: "April", value: 28 },
-      { date: "2022-05-01", label: "May", value: 92 },
-      { date: "2022-06-01", label: "June", value: 33 },
-      { date: "2022-07-01", label: "July", value: 18 },
-    ],
-    // lineChartData: JSON.parse(localStorage.getItem("lineChartData")) || [],
-
+    BarScanChartData: JSON.parse(localStorage.getItem("lineChartData")) || [],
+    BarCompleteChartData:
+      JSON.parse(localStorage.getItem("lineChartData")) || [],
+    lineChartData: JSON.parse(localStorage.getItem("lineChartData")) || [],
     lineChartrange: {
       year: new Date().getFullYear(),
-      month: null,
+      month: new Date().getMonth(),
       day: null,
     },
     loyalCust: [],
@@ -544,6 +24,399 @@ export const useTransactionStore = defineStore("transaction", {
     pageSizeCust: 5,
   }),
   getters: {
+    totalScanCompleteForMonth(state) {
+      const currentMonth = state.lineChartrange.month;
+      const currentYear = state.lineChartrange.year;
+      const completedData = state.lineChartData.filter((item) => {
+        const date = new Date(item.timestamp);
+        return (
+          date.getMonth() === currentMonth &&
+          date.getFullYear() === currentYear &&
+          item.scanned === "completed"
+        );
+      });
+      const total = completedData.length;
+      const average = (total / completedData.length).toFixed(2) || 0;
+      return { total, average };
+    },
+    totalScanForMonth(state) {
+      const currentMonth = state.lineChartrange.month;
+      const currentYear = state.lineChartrange.year;
+      const scanData = state.lineChartData.filter((item) => {
+        const date = new Date(item.timestamp);
+        return (
+          date.getMonth() === currentMonth &&
+          date.getFullYear() === currentYear &&
+          item.scanned === "scanned"
+        );
+      });
+      const total = scanData.length;
+      const average = (total / scanData.length).toFixed(2) || 0;
+      return { total, average };
+    },
+
+    topLocation(state) {
+      const locationData = state.lineChartData.reduce((acc, item) => {
+        const location = `${item.region}, ${item.city}, ${item.town}`;
+        if (!acc[location]) {
+          acc[location] = {
+            completed: 0,
+            scanned: 0,
+            dates: [],
+            products: {},
+            daily: {},
+            monthly: {},
+            yearly: {},
+          };
+        }
+
+        const date = new Date(item.timestamp);
+        const day = date.toISOString().split("T")[0]; // YYYY-MM-DD format
+        const month = `${date.getFullYear()}-${date.getMonth() + 1}`; // YYYY-M format
+        const year = date.getFullYear(); // YYYY format
+
+        if (!acc[location].products[item.productName]) {
+          acc[location].products[item.productName] = {
+            completed: 0,
+            scanned: 0,
+          };
+        }
+
+        if (item.scanned === "completed") {
+          acc[location].completed++;
+          acc[location].products[item.productName].completed++;
+          if (!acc[location].daily[day])
+            acc[location].daily[day] = { completed: 0, scanned: 0 };
+          if (!acc[location].monthly[month])
+            acc[location].monthly[month] = { completed: 0, scanned: 0 };
+          if (!acc[location].yearly[year])
+            acc[location].yearly[year] = { completed: 0, scanned: 0 };
+          acc[location].daily[day].completed++;
+          acc[location].monthly[month].completed++;
+          acc[location].yearly[year].completed++;
+        }
+        if (item.scanned === "scanned") {
+          acc[location].scanned++;
+          acc[location].products[item.productName].scanned++;
+          if (!acc[location].daily[day])
+            acc[location].daily[day] = { completed: 0, scanned: 0 };
+          if (!acc[location].monthly[month])
+            acc[location].monthly[month] = { completed: 0, scanned: 0 };
+          if (!acc[location].yearly[year])
+            acc[location].yearly[year] = { completed: 0, scanned: 0 };
+          acc[location].daily[day].scanned++;
+          acc[location].monthly[month].scanned++;
+          acc[location].yearly[year].scanned++;
+        }
+        acc[location].dates.push(date);
+        return acc;
+      }, {});
+
+      const topLocation = Object.keys(locationData).reduce(
+        (a, b) =>
+          locationData[a]?.completed > locationData[b]?.completed ? a : b,
+        ""
+      );
+
+      const totalCompleted = locationData[topLocation].completed;
+      const totalScanned = locationData[topLocation].scanned;
+      const conversionRate = (
+        totalCompleted /
+        (totalScanned + totalCompleted)
+      ).toFixed(2);
+
+      const dateRange = locationData[topLocation].dates;
+      const days =
+        (Math.max(...dateRange) - Math.min(...dateRange)) /
+          (1000 * 60 * 60 * 24) || 1;
+      const averagePerDay = (totalScanned / days).toFixed(2);
+      const averagePerMonth = (averagePerDay * 30).toFixed(2);
+      const averagePerYear = (averagePerDay * 365).toFixed(2);
+
+      const dailyStats = Object.entries(locationData[topLocation].daily).map(
+        ([date, counts]) => ({
+          date,
+          completed: counts.completed,
+          scanned: counts.scanned,
+        })
+      );
+
+      const monthlyStats = Object.entries(
+        locationData[topLocation].monthly
+      ).map(([date, counts]) => ({
+        month: date,
+        completed: counts.completed,
+        scanned: counts.scanned,
+      }));
+
+      const yearlyStats = Object.entries(locationData[topLocation].yearly).map(
+        ([date, counts]) => ({
+          year: date,
+          completed: counts.completed,
+          scanned: counts.scanned,
+        })
+      );
+
+      const reigningProduct = Object.keys(
+        locationData[topLocation].products
+      ).reduce(
+        (a, b) =>
+          locationData[topLocation].products[a]?.completed >
+          locationData[topLocation].products[b].completed
+            ? a
+            : b,
+        ""
+      );
+
+      return {
+        location: topLocation,
+        completed: totalCompleted,
+        scanned: totalScanned,
+        conversionRate,
+        averagePerDay,
+        averagePerMonth,
+        averagePerYear,
+        dailyStats,
+        monthlyStats,
+        yearlyStats,
+        reigningProduct,
+      };
+    },
+    leastAndMedianLocations(state) {
+      const locationData = state.lineChartData.reduce((acc, item) => {
+        const location = `${item.region}, ${item.city}, ${item.town}`;
+        if (!acc[location]) {
+          acc[location] = {
+            completed: 0,
+            scanned: 0,
+            dates: [],
+            products: {},
+            daily: {},
+            monthly: {},
+            yearly: {},
+          };
+        }
+
+        const date = new Date(item.timestamp);
+        const day = date.toISOString().split("T")[0]; // YYYY-MM-DD format
+        const month = `${date.getFullYear()}-${date.getMonth() + 1}`; // YYYY-M format
+        const year = date.getFullYear(); // YYYY format
+
+        if (!acc[location].products[item.productName]) {
+          acc[location].products[item.productName] = {
+            completed: 0,
+            scanned: 0,
+          };
+        }
+
+        if (item.scanned === "completed") {
+          acc[location].completed++;
+          acc[location].products[item.productName].completed++;
+          if (!acc[location].daily[day])
+            acc[location].daily[day] = { completed: 0, scanned: 0 };
+          if (!acc[location].monthly[month])
+            acc[location].monthly[month] = { completed: 0, scanned: 0 };
+          if (!acc[location].yearly[year])
+            acc[location].yearly[year] = { completed: 0, scanned: 0 };
+          acc[location].daily[day].completed++;
+          acc[location].monthly[month].completed++;
+          acc[location].yearly[year].completed++;
+        }
+        if (item.scanned === "scanned") {
+          acc[location].scanned++;
+          acc[location].products[item.productName].scanned++;
+          if (!acc[location].daily[day])
+            acc[location].daily[day] = { completed: 0, scanned: 0 };
+          if (!acc[location].monthly[month])
+            acc[location].monthly[month] = { completed: 0, scanned: 0 };
+          if (!acc[location].yearly[year])
+            acc[location].yearly[year] = { completed: 0, scanned: 0 };
+          acc[location].daily[day].scanned++;
+          acc[location].monthly[month].scanned++;
+          acc[location].yearly[year].scanned++;
+        }
+        acc[location].dates.push(date);
+        return acc;
+      }, {});
+
+      const locations = Object.keys(locationData);
+
+      const sortedLocations = locations.sort(
+        (a, b) => locationData[a].completed - locationData[b].completed
+      );
+      const medianIndex = Math.floor(sortedLocations.length / 2);
+
+      const leastLocation = sortedLocations[0];
+      const medianLocation = sortedLocations[medianIndex];
+
+      const getLocationData = (location) => {
+        const totalCompleted = locationData[location].completed;
+        const totalScanned = locationData[location].scanned;
+        const conversionRate = totalCompleted / (totalScanned + totalCompleted);
+
+        const dateRange = locationData[location].dates;
+        const days =
+          (Math.max(...dateRange) - Math.min(...dateRange)) /
+            (1000 * 60 * 60 * 24) || 1;
+        const averagePerDay = (totalScanned / days).toFixed(2);
+        const averagePerMonth = (averagePerDay * 30).toFixed(2);
+        const averagePerYear = (averagePerDay * 365).toFixed(2);
+
+        const dailyStats = Object.entries(locationData[location].daily).map(
+          ([date, counts]) => ({
+            date,
+            completed: counts.completed,
+            scanned: counts.scanned,
+          })
+        );
+
+        const monthlyStats = Object.entries(locationData[location].monthly).map(
+          ([date, counts]) => ({
+            month: date,
+            completed: counts.completed,
+            scanned: counts.scanned,
+          })
+        );
+
+        const yearlyStats = Object.entries(locationData[location].yearly).map(
+          ([date, counts]) => ({
+            year: date,
+            completed: counts.completed,
+            scanned: counts.scanned,
+          })
+        );
+
+        const reigningProduct = Object.keys(
+          locationData[location].products
+        ).reduce(
+          (a, b) =>
+            locationData[location].products[a].completed >
+            locationData[location].products[b].completed
+              ? a
+              : b,
+          ""
+        );
+
+        return {
+          location,
+          completed: totalCompleted,
+          scanned: totalScanned,
+          conversionRate,
+          averagePerDay,
+          averagePerMonth,
+          averagePerYear,
+          dailyStats,
+          monthlyStats,
+          yearlyStats,
+          reigningProduct,
+        };
+      };
+
+      return {
+        leastLocationData: getLocationData(leastLocation),
+        medianLocationData: getLocationData(medianLocation),
+      };
+    },
+
+    productMetrics(state) {
+      const productData = state.lineChartData.reduce((acc, item) => {
+        if (!acc[item.productName]) {
+          acc[item.productName] = {
+            completed: 0,
+            scanned: 0,
+            dates: [],
+            daily: {},
+            monthly: {},
+            yearly: {},
+          };
+        }
+
+        const date = new Date(item.timestamp);
+        const day = date.toISOString().split("T")[0]; // YYYY-MM-DD format
+        const month = `${date.getFullYear()}-${date.getMonth() + 1}`; // YYYY-M format
+        const year = date.getFullYear(); // YYYY format
+
+        if (item.scanned === "completed") {
+          acc[item.productName].completed++;
+          if (!acc[item.productName].daily[day])
+            acc[item.productName].daily[day] = { completed: 0, scanned: 0 };
+          if (!acc[item.productName].monthly[month])
+            acc[item.productName].monthly[month] = { completed: 0, scanned: 0 };
+          if (!acc[item.productName].yearly[year])
+            acc[item.productName].yearly[year] = { completed: 0, scanned: 0 };
+          acc[item.productName].daily[day].completed++;
+          acc[item.productName].monthly[month].completed++;
+          acc[item.productName].yearly[year].completed++;
+        }
+        if (item.scanned === "scanned") {
+          acc[item.productName].scanned++;
+          if (!acc[item.productName].daily[day])
+            acc[item.productName].daily[day] = { completed: 0, scanned: 0 };
+          if (!acc[item.productName].monthly[month])
+            acc[item.productName].monthly[month] = { completed: 0, scanned: 0 };
+          if (!acc[item.productName].yearly[year])
+            acc[item.productName].yearly[year] = { completed: 0, scanned: 0 };
+          acc[item.productName].daily[day].scanned++;
+          acc[item.productName].monthly[month].scanned++;
+          acc[item.productName].yearly[year].scanned++;
+        }
+        acc[item.productName].dates.push(date);
+        return acc;
+      }, {});
+
+      const getProductData = (product) => {
+        const totalCompleted = productData[product].completed;
+        const totalScanned = productData[product].scanned;
+        const conversionRate = totalCompleted / (totalScanned + totalCompleted);
+
+        const dateRange = productData[product].dates;
+        const days =
+          (Math.max(...dateRange) - Math.min(...dateRange)) /
+            (1000 * 60 * 60 * 24) || 1;
+        const averagePerDay = (totalScanned / days).toFixed(2);
+        const averagePerMonth = (averagePerDay * 30).toFixed(2);
+        const averagePerYear = (averagePerDay * 365).toFixed(2);
+
+        const dailyStats = Object.entries(productData[product].daily).map(
+          ([date, counts]) => ({
+            date,
+            completed: counts.completed,
+            scanned: counts.scanned,
+          })
+        );
+
+        const monthlyStats = Object.entries(productData[product].monthly).map(
+          ([date, counts]) => ({
+            month: date,
+            completed: counts.completed,
+            scanned: counts.scanned,
+          })
+        );
+
+        const yearlyStats = Object.entries(productData[product].yearly).map(
+          ([date, counts]) => ({
+            year: date,
+            completed: counts.completed,
+            scanned: counts.scanned,
+          })
+        );
+
+        return {
+          product,
+          completed: totalCompleted,
+          scanned: totalScanned,
+          conversionRate,
+          averagePerDay,
+          averagePerMonth,
+          averagePerYear,
+          dailyStats,
+          monthlyStats,
+          yearlyStats,
+        };
+      };
+
+      return Object.keys(productData).map((product) => getProductData(product));
+    },
     paginatedTrendz(state) {
       const start = (state.currentPageTrendz - 1) * state.pageSizeTrendz;
       const end = start + state.pageSizeTrendz;
@@ -567,29 +440,6 @@ export const useTransactionStore = defineStore("transaction", {
     },
     totalCustomers: (state) => {
       return Math.ceil(state.loyalCust.length / state.pageSizeCust);
-    },
-
-    filteredLineData(state) {
-      const year = state.lineChartrange.year;
-      const month = state.lineChartrange.month;
-      return state.lineChartData.filter((item) => {
-        const date = new Date(item.date);
-        return (
-          (year ? date.getFullYear() === year : true) &&
-          (month !== null ? date.getMonth() === month : true)
-        );
-      });
-    },
-    filteredCompletedData(state) {
-      const year = state.lineChartrange.year;
-      const month = state.lineChartrange.month;
-      return state.CompletedChartData.filter((item) => {
-        const date = new Date(item.date);
-        return (
-          (year ? date.getFullYear() === year : true) &&
-          (month !== null ? date.getMonth() === month : true)
-        );
-      });
     },
   },
   actions: {
@@ -648,7 +498,6 @@ export const useTransactionStore = defineStore("transaction", {
           this.loyalCust = JSON.parse(custData);
         } else {
           const response = await getData.getCustomers();
-          console.log(response);
           this.loyalCust = response.data.results.map((item) => ({
             ...item,
           }));
@@ -687,8 +536,10 @@ export const useTransactionStore = defineStore("transaction", {
     },
     async fetchLineData() {
       try {
-        const response = await getData.getLineChart(); // Replace with your backend endpoint
-        this.lineChartData = response.data;
+        //const response = await getData.getLineChart(); // Replace with your backend endpoint
+        const response = await fetch("../../src/stores/dummy.json");
+        const data = await response.json();
+        this.lineChartData = data;
         localStorage.setItem(
           "lineChartData",
           JSON.stringify(this.lineChartData)
@@ -697,22 +548,7 @@ export const useTransactionStore = defineStore("transaction", {
         console.error("Failed to fetch line data:", error);
       }
     },
-    async fetchCompletedData() {
-      try {
-        const response = await getData.getCompletedChart(); // Replace with your backend endpoint
-        this.CompletedChartData = response.data;
-        localStorage.setItem(
-          "CompletedChartData",
-          JSON.stringify(this.CompletedChartData)
-        );
-      } catch (error) {
-        console.error("Failed to fetch completed data:", error);
-      }
-    },
-    updateRange(range) {
-      this.lineChartrange.year = range.year;
-      this.lineChartrange.month = range.month;
-    },
+
     async downloadReport() {
       try {
         const response = await getData.getReport(); // Assuming getReport fetches the file from backend

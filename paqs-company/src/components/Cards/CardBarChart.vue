@@ -9,7 +9,7 @@
             Location Statistics
           </h6>
           <h2 class="text-blueGray-700 text-xl font-semibold">
-            Top 5 Locations with total scan vs completed scan
+            Locations with total scan vs completed scan
           </h2>
         </div>
       </div>
@@ -69,7 +69,6 @@ const barFilteredData = computed(() => {
   const ran = selectRange.value ? selectRange.value : "High";
 
   const groupByField = (data, field) => {
-    console.log(`Grouping by field: ${field}`);
     const grouped = data.reduce((acc, item) => {
       let key;
       if (field === "Region") {
@@ -77,7 +76,7 @@ const barFilteredData = computed(() => {
       } else if (field === "City") {
         key = `${item.region}-${item.city}`;
       } else if (field === "Town") {
-        key = `${item.city}-${item.town}`;
+        key = `${item.region}-${item.city}-${item.town}`;
       } else if (field === "Locality") {
         key = `${item.city}-${item.town}-${item.locality}`;
       } else {
@@ -91,18 +90,15 @@ const barFilteredData = computed(() => {
       key,
       avgValue: grouped[key].reduce((a, b) => a + b, 0) / grouped[key].length,
     }));
-  };
+  }; // Indicate how the data should look like on the x-axis
 
   const sortAndSliceData = (data) => {
     const sorted = data.sort((a, b) => b.avgValue - a.avgValue);
-    return ran === "High" ? sorted.slice(0, 10) : sorted.slice(-10).reverse();
+    return ran === "High" ? sorted.slice(0, 5) : sorted.slice(-5).reverse(); // The number items that appears on the chart
   };
 
   const barScanData = groupByField(BarData.BarScanChartData, crit);
   const barCompleteData = groupByField(BarData.BarCompleteChartData, crit);
-
-  console.log(`Filtered Bar Scan Data: ${JSON.stringify(barScanData)}`);
-  console.log(`Filtered Bar Complete Data: ${JSON.stringify(barCompleteData)}`);
 
   return {
     crit,
@@ -198,7 +194,6 @@ const createChart = () => {
       },
     },
   };
-  console.log("Parsed Data", config.data);
   chartInstance = new Chart(ctx, config);
 };
 

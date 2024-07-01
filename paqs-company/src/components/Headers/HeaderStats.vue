@@ -5,39 +5,39 @@
       <div>
         <!-- Card stats -->
         <div class="flex flex-wrap">
-          <div class="w-full lg:w-6/12 xl:w-3/12 px-4">
+          <div class="w-full lg:w-6/12 xl:w-3/12 px-4" v-if="totalScanComplete">
             <card-stats
-              stat-subtitle="TOTAL COMPLETE"
-              stat-title="350,897"
+              stat-subtitle="TOTAL SCAN COMPLETE"
+              :stat-title="totalScanComplete.total"
               stat-arrow="up"
-              stat-percent="3.48"
+              :stat-percent="totalScanComplete.average"
               stat-percent-color="text-emerald-500"
-              stat-descripiron="Since last month"
+              :stat-descripiron="`For the month of ${currentMonth}`"
               stat-icon-name="fas fa-bolt"
               stat-icon-color="bg-red-500"
             />
           </div>
-          <div class="w-full lg:w-6/12 xl:w-3/12 px-4">
+          <div class="w-full lg:w-6/12 xl:w-3/12 px-4" v-if="totalScan">
             <card-stats
               stat-subtitle="TOTAL SCAN"
-              stat-title="2,356"
+              :stat-title="totalScan.total"
               stat-arrow="down"
-              stat-percent="3.48"
+              :stat-percent="totalScan.average"
               stat-percent-color="text-red-500"
-              stat-descripiron="Since last week"
+              :stat-descripiron="`For the month of ${currentMonth}`"
               stat-icon-name="fas fa-qrcode"
               stat-icon-color="bg-orange-500"
             />
           </div>
-          <div class="w-full lg:w-6/12 xl:w-3/12 px-4">
+          <div class="w-full lg:w-6/12 xl:w-3/12 px-4" v-if="topLocation">
             <card-stats
-              stat-subtitle="TOP CUSTOMER"
-              stat-title="924"
+              stat-subtitle="TOP LOCATION"
+              :stat-title="topLocation.location"
               stat-arrow="down"
-              stat-percent="1.10"
+              :stat-percent="topLocation.conversionRate"
               stat-percent-color="text-orange-500"
-              stat-descripiron="APIRIGU CHAKA PAMAS"
-              stat-icon-name="fas fa-users"
+              :stat-descripiron="topLocation.reigningProduct"
+              stat-icon-name="fas fa-map-pin"
               stat-icon-color="bg-pink-500"
             />
           </div>
@@ -59,13 +59,16 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from "vue";
+import { useTransactionStore } from "../../stores/dataFeed";
 import CardStats from "../Cards/CardStats.vue";
 
-export default {
-  components: {
-    CardStats,
-  },
-};
+const store = useTransactionStore();
+
+const totalScanComplete = computed(() => store.totalScanCompleteForMonth);
+const totalScan = computed(() => store.totalScanForMonth);
+const topLocation = computed(() => store.topLocation);
+const currentMonth = new Date().toLocaleString("default", { month: "long" });
 </script>
 <style scoped></style>

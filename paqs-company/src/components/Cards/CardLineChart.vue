@@ -24,7 +24,20 @@
           v-model="selectedYear"
           :options="yearOptions"
           label="Year"
-          style="width: 150px"
+          style="width: 100px"
+          clearable
+          @update:model-value="updateChart"
+        />
+      </div>
+      <div class="mr-4">
+        <q-select
+          bg-color="white"
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          v-model="selectedMonth"
+          :options="monthOptions"
+          label="Month"
+          style="width: 100px"
           clearable
           @update:model-value="updateChart"
         />
@@ -34,10 +47,10 @@
           bg-color="white"
           transition-show="jump-up"
           transition-hide="jump-up"
-          v-model="selectedMonth"
-          :options="monthOptions"
-          label="Month"
-          style="width: 150px"
+          v-model="selectedDay"
+          :options="dayOptions"
+          label="Day"
+          style="width: 100px"
           clearable
           @update:model-value="updateChart"
         />
@@ -58,11 +71,13 @@ import "chartjs-adapter-date-fns";
 import { enUS } from "date-fns/locale";
 import Chart from "chart.js/auto";
 import { useTransactionStore } from "src/stores/dataFeed";
+import { groupBy } from "lodash";
 
 const lineChart = ref("line-chart");
 const lineData = useTransactionStore();
 const selectedYear = ref(null);
 const selectedMonth = ref(null);
+const selectedDay = ref(null);
 let chartInstance = null;
 
 const months = [
@@ -82,7 +97,7 @@ const months = [
 
 const yearOptions = computed(() => {
   return lineData.lineChartData
-    .map((item) => new Date(item.date).getFullYear())
+    .map((item) => new Date(item.timestamp).getFullYear())
     .filter((value, index, self) => self.indexOf(value) === index)
     .sort((a, b) => a - b);
 });
@@ -92,50 +107,64 @@ const monthOptions = months.map((month, index) => ({
   value: index,
 }));
 
+const dayOptions = computed(() => {
+  if (selectedYear.value && selectedMonth.value.value !== null) {
+    const daysInMonth = new Date(
+      selectedYear.value,
+      selectedMonth.value.value + 1,
+      0
+    ).getDate();
+    console.log("days", daysInMonth);
+    return Array.from({ length: daysInMonth }, (v, k) => k + 1).map((day) => ({
+      label: day,
+      value: day,
+    }));
+  }
+  return [];
+});
+
+console.log("day options", dayOptions);
+
 const filteredData = computed(() => {
   const year = selectedYear.value ? parseInt(selectedYear.value) : null;
   const month = selectedMonth.value !== null ? selectedMonth.value.value : null;
+  const day = selectedDay.value !== null ? selectedDay.value : null;
+  console.log(year, month, day);
+  const filterCondition = (item) => {
+    const date = new Date(item.timestamp);
+    return (
+      (year !== null ? date.getFullYear() === year : true) &&
+      (month !== null ? date.getMonth() === month : true) &&
+      (day !== null ? date.getDate() === day : true)
+    );
+  };
 
   const lineFiltered = lineData.lineChartData
-    .filter((item) => {
-      const date = new Date(item.date);
-      if (year !== null && month !== null) {
-        return date.getFullYear() === year && date.getMonth() === month;
-      } else if (year !== null) {
-        return date.getFullYear() === year;
-      } else if (month !== null) {
-        return date.getMonth() === month;
-      } else {
-        return true;
-      }
-    })
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
+    .filter(filterCondition)
+    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-  const completedFiltered = lineData.CompletedChartData.filter((item) => {
-    const date = new Date(item.date);
-    if (year !== null && month !== null) {
-      return date.getFullYear() === year && date.getMonth() === month;
-    } else if (year !== null) {
-      return date.getFullYear() === year;
-    } else if (month !== null) {
-      return date.getMonth() === month;
-    } else {
-      return true;
-    }
-  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  return lineFiltered;
+});
 
-  return { lineFiltered, completedFiltered };
+const groupedData = computed(() => {
+  const lineFiltered = filteredData.value;
+
+  const groupData = (data) => {
+    return groupBy(data, (item) => {
+      const date = new Date(item.timestamp);
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    });
+  };
+
+  return groupData(lineFiltered);
 });
 
 const xLabels = computed(() => {
-  const { lineFiltered } = filteredData.value;
-  return lineFiltered.map(
-    (item) =>
-      `${months[new Date(item.date).getMonth()]} ${new Date(
-        item.date
-      ).getFullYear()}`
+  return Object.keys(groupedData.value).sort(
+    (a, b) => new Date(a) - new Date(b)
   );
 });
+
 const createChart = () => {
   const ctx = lineChart.value.getContext("2d");
 
@@ -143,7 +172,7 @@ const createChart = () => {
     chartInstance.destroy();
   }
 
-  const { lineFiltered, completedFiltered } = filteredData.value;
+  const groupedLine = groupedData.value;
 
   const config = {
     type: "line",
@@ -154,14 +183,22 @@ const createChart = () => {
           label: "Total Scans",
           backgroundColor: "#4c51bf",
           borderColor: "#4c51bf",
-          data: lineFiltered.map((item) => item.value),
+          data: xLabels.value.map((date) => {
+            return (groupedLine[date] || []).filter(
+              (item) => item.scanned === "scanned"
+            ).length;
+          }),
           fill: false,
         },
         {
           label: "Completed Scans",
           backgroundColor: "#ff6384",
           borderColor: "#ff6384",
-          data: completedFiltered.map((item) => item.value),
+          data: xLabels.value.map((date) => {
+            return (groupedLine[date] || []).filter(
+              (item) => item.scanned === "completed"
+            ).length;
+          }),
           fill: false,
         },
       ],
@@ -202,7 +239,6 @@ const createChart = () => {
 
 onMounted(async () => {
   await lineData.fetchLineData();
-  await lineData.fetchCompletedData();
   createChart();
 });
 
@@ -211,7 +247,7 @@ const updateChart = () => {
 };
 
 watch(
-  () => [selectedYear.value, selectedMonth.value],
+  () => [selectedYear.value, selectedMonth.value, selectedDay.value],
   () => {
     updateChart();
   }
