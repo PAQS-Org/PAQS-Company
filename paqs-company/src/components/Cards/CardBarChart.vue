@@ -65,8 +65,8 @@ let chartInstance = null;
 const BarData = useTransactionStore();
 
 const barFilteredData = computed(() => {
-  const crit = selectCriteria.value ? selectCriteria.value : "Region";
-  const ran = selectRange.value ? selectRange.value : "High";
+  const crit = selectCriteria.value || "Region";
+  const ran = selectRange.value || "High";
 
   const groupByField = (data, field) => {
     const grouped = data.reduce((acc, item) => {
@@ -82,29 +82,26 @@ const barFilteredData = computed(() => {
       } else {
         key = item[field.toLowerCase()];
       }
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(parseFloat(item.value));
+      if (!acc[key]) acc[key] = { scanned: 0, completed: 0 };
+      if (item.scanned === "scanned") acc[key].scanned++;
+      if (item.scanned === "completed") acc[key].completed++;
       return acc;
     }, {});
+
     return Object.keys(grouped).map((key) => ({
       key,
-      avgValue: grouped[key].reduce((a, b) => a + b, 0) / grouped[key].length,
+      scanned: grouped[key].scanned,
+      completed: grouped[key].completed,
     }));
-  }; // Indicate how the data should look like on the x-axis
+  };
 
   const sortAndSliceData = (data) => {
-    const sorted = data.sort((a, b) => b.avgValue - a.avgValue);
-    return ran === "High" ? sorted.slice(0, 5) : sorted.slice(-5).reverse(); // The number items that appears on the chart
+    const sorted = data.sort((a, b) => b.completed - a.completed);
+    return ran === "High" ? sorted.slice(0, 5) : sorted.slice(-5).reverse();
   };
 
-  const barScanData = groupByField(BarData.BarScanChartData, crit);
-  const barCompleteData = groupByField(BarData.BarCompleteChartData, crit);
-
-  return {
-    crit,
-    barScanFilter: sortAndSliceData(barScanData),
-    barCompleteFilter: sortAndSliceData(barCompleteData),
-  };
+  const barData = groupByField(BarData.lineChartData, crit);
+  return sortAndSliceData(barData);
 });
 
 const createChart = () => {
@@ -114,25 +111,25 @@ const createChart = () => {
     chartInstance.destroy();
   }
 
-  const { crit, barScanFilter, barCompleteFilter } = barFilteredData.value;
+  const { crit } = selectCriteria.value ? barFilteredData.value : {};
 
   const config = {
     type: "bar",
     data: {
-      labels: barScanFilter.map((item) => item.key),
+      labels: barFilteredData.value.map((item) => item.key),
       datasets: [
         {
           label: "Total Scans",
           backgroundColor: "#4c51bf",
           borderColor: "#4c51bf",
-          data: barScanFilter.map((item) => item.avgValue),
+          data: barFilteredData.value.map((item) => item.scanned),
           fill: false,
         },
         {
           label: "Completed Scans",
           backgroundColor: "#ff6384",
           borderColor: "#ff6384",
-          data: barCompleteFilter.map((item) => item.avgValue),
+          data: barFilteredData.value.map((item) => item.completed),
           fill: false,
         },
       ],
@@ -198,8 +195,7 @@ const createChart = () => {
 };
 
 onMounted(async () => {
-  await BarData.fetchBarScanData();
-  await BarData.fetchBarCompleteData();
+  await BarData.fetchLineData();
   createChart();
 });
 

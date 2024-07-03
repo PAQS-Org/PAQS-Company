@@ -162,7 +162,7 @@ export const useTransactionStore = defineStore("transaction", {
       ).reduce(
         (a, b) =>
           locationData[topLocation].products[a]?.completed >
-          locationData[topLocation].products[b].completed
+          locationData[topLocation].products[b]?.completed
             ? a
             : b,
         ""
@@ -318,105 +318,197 @@ export const useTransactionStore = defineStore("transaction", {
       };
     },
 
-    productMetrics(state) {
-      const productData = state.lineChartData.reduce((acc, item) => {
-        if (!acc[item.productName]) {
-          acc[item.productName] = {
-            completed: 0,
-            scanned: 0,
-            dates: [],
-            daily: {},
-            monthly: {},
-            yearly: {},
-          };
-        }
-
-        const date = new Date(item.timestamp);
-        const day = date.toISOString().split("T")[0]; // YYYY-MM-DD format
-        const month = `${date.getFullYear()}-${date.getMonth() + 1}`; // YYYY-M format
-        const year = date.getFullYear(); // YYYY format
-
-        if (item.scanned === "completed") {
-          acc[item.productName].completed++;
-          if (!acc[item.productName].daily[day])
-            acc[item.productName].daily[day] = { completed: 0, scanned: 0 };
-          if (!acc[item.productName].monthly[month])
-            acc[item.productName].monthly[month] = { completed: 0, scanned: 0 };
-          if (!acc[item.productName].yearly[year])
-            acc[item.productName].yearly[year] = { completed: 0, scanned: 0 };
-          acc[item.productName].daily[day].completed++;
-          acc[item.productName].monthly[month].completed++;
-          acc[item.productName].yearly[year].completed++;
-        }
-        if (item.scanned === "scanned") {
-          acc[item.productName].scanned++;
-          if (!acc[item.productName].daily[day])
-            acc[item.productName].daily[day] = { completed: 0, scanned: 0 };
-          if (!acc[item.productName].monthly[month])
-            acc[item.productName].monthly[month] = { completed: 0, scanned: 0 };
-          if (!acc[item.productName].yearly[year])
-            acc[item.productName].yearly[year] = { completed: 0, scanned: 0 };
-          acc[item.productName].daily[day].scanned++;
-          acc[item.productName].monthly[month].scanned++;
-          acc[item.productName].yearly[year].scanned++;
-        }
-        acc[item.productName].dates.push(date);
-        return acc;
-      }, {});
-
-      const getProductData = (product) => {
-        const totalCompleted = productData[product].completed;
-        const totalScanned = productData[product].scanned;
-        const conversionRate = totalCompleted / (totalScanned + totalCompleted);
-
-        const dateRange = productData[product].dates;
-        const days =
-          (Math.max(...dateRange) - Math.min(...dateRange)) /
-            (1000 * 60 * 60 * 24) || 1;
-        const averagePerDay = (totalScanned / days).toFixed(2);
-        const averagePerMonth = (averagePerDay * 30).toFixed(2);
-        const averagePerYear = (averagePerDay * 365).toFixed(2);
-
-        const dailyStats = Object.entries(productData[product].daily).map(
-          ([date, counts]) => ({
-            date,
-            completed: counts.completed,
-            scanned: counts.scanned,
-          })
-        );
-
-        const monthlyStats = Object.entries(productData[product].monthly).map(
-          ([date, counts]) => ({
-            month: date,
-            completed: counts.completed,
-            scanned: counts.scanned,
-          })
-        );
-
-        const yearlyStats = Object.entries(productData[product].yearly).map(
-          ([date, counts]) => ({
-            year: date,
-            completed: counts.completed,
-            scanned: counts.scanned,
-          })
-        );
-
-        return {
-          product,
-          completed: totalCompleted,
-          scanned: totalScanned,
-          conversionRate,
-          averagePerDay,
-          averagePerMonth,
-          averagePerYear,
-          dailyStats,
-          monthlyStats,
-          yearlyStats,
-        };
-      };
-
-      return Object.keys(productData).map((product) => getProductData(product));
+    // new code
+    filterData(state) {
+      return (condition) => state.lineChartData.filter(condition);
     },
+    // Calculate metrics for the current and previous day, month, and year
+    checkoutMetrics(state, getters) {
+      const today = new Date();
+      const prevDay = new Date(today);
+      prevDay.setDate(today.getDate() - 1);
+      const prevMonth = new Date(today);
+      prevMonth.setMonth(today.getMonth() - 1);
+      const prevYear = new Date(today);
+      prevYear.setFullYear(today.getFullYear() - 1);
+
+      const currentDayMetrics = this.calculateMetricsForPeriod(today, "day");
+      const prevDayMetrics = this.calculateMetricsForPeriod(prevDay, "day");
+      const currentMonthMetrics = this.calculateMetricsForPeriod(
+        today,
+        "month"
+      );
+      const prevMonthMetrics = this.calculateMetricsForPeriod(
+        prevMonth,
+        "month"
+      );
+      const currentYearMetrics = this.calculateMetricsForPeriod(today, "year");
+      const prevYearMetrics = this.calculateMetricsForPeriod(prevYear, "year");
+
+      return {
+        currentDayMetrics,
+        prevDayMetrics,
+        currentMonthMetrics,
+        prevMonthMetrics,
+        currentYearMetrics,
+        prevYearMetrics,
+      };
+    },
+    calculateMetricsForPeriod(state, getters) {
+      return (date, period) => {
+        const start = new Date(date);
+        const end = new Date(date);
+
+        if (period === "day") {
+          end.setDate(start.getDate() + 1);
+        } else if (period === "month") {
+          start.setDate(1);
+          end.setMonth(start.getMonth() + 1);
+        } else if (period === "year") {
+          start.setMonth(0, 1);
+          end.setFullYear(start.getFullYear() + 1);
+        }
+
+        const filteredData = this.filterData((item) => {
+          const itemDate = new Date(item.timestamp);
+          return itemDate >= start && itemDate < end;
+        });
+
+        const completedCount = filteredData.filter(
+          (item) => item.scanned === "completed"
+        ).length;
+        const scannedCount = filteredData.filter(
+          (item) => item.scanned === "scanned"
+        ).length;
+
+        return { completedCount, scannedCount };
+      };
+    },
+    conversionRate(state, getters) {
+      return (metrics) => {
+        if (metrics.scannedCount === 0) return 0;
+        return (metrics.completedCount / metrics.scannedCount) * 100;
+      };
+    },
+    highestCheckout(state) {
+      return (productName) => {
+        const productData = state.lineChartData.filter(
+          (item) =>
+            item.productName === productName && item.scanned === "completed"
+        );
+        const dailyMetrics = this.aggregateMetrics(productData, "day");
+        const monthlyMetrics = this.aggregateMetrics(productData, "month");
+        const yearlyMetrics = this.aggregateMetrics(productData, "year");
+
+        const highestDaily = dailyMetrics.reduce(
+          (max, curr) => (curr.count > max.count ? curr : max),
+          { count: 0 }
+        );
+        const highestMonthly = monthlyMetrics.reduce(
+          (max, curr) => (curr.count > max.count ? curr : max),
+          { count: 0 }
+        );
+        const highestYearly = yearlyMetrics.reduce(
+          (max, curr) => (curr.count > max.count ? curr : max),
+          { count: 0 }
+        );
+
+        return { highestDaily, highestMonthly, highestYearly };
+      };
+    },
+    lowestCheckout(state) {
+      return (productName) => {
+        const productData = state.lineChartData.filter(
+          (item) =>
+            item.productName === productName && item.scanned === "completed"
+        );
+        const dailyMetrics = this.aggregateMetrics(productData, "day");
+        const monthlyMetrics = this.aggregateMetrics(productData, "month");
+        const yearlyMetrics = this.aggregateMetrics(productData, "year");
+
+        const lowestDaily = dailyMetrics.reduce(
+          (min, curr) => (curr.count < min.count ? curr : min),
+          { count: Infinity }
+        );
+        const lowestMonthly = monthlyMetrics.reduce(
+          (min, curr) => (curr.count < min.count ? curr : min),
+          { count: Infinity }
+        );
+        const lowestYearly = yearlyMetrics.reduce(
+          (min, curr) => (curr.count < min.count ? curr : min),
+          { count: Infinity }
+        );
+
+        return { lowestDaily, lowestMonthly, lowestYearly };
+      };
+    },
+    aggregateMetrics(state) {
+      return (data, period) => {
+        const metrics = {};
+
+        data.forEach((item) => {
+          const date = new Date(item.timestamp);
+          let key;
+          if (period === "day") {
+            key = date.toISOString().split("T")[0];
+          } else if (period === "month") {
+            key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+          } else if (period === "year") {
+            key = date.getFullYear();
+          }
+
+          if (!metrics[key]) {
+            metrics[key] = { date: key, count: 0 };
+          }
+
+          metrics[key].count++;
+        });
+
+        return Object.values(metrics);
+      };
+    },
+    highestCheckoutPerLocation(state) {
+      return (productName) => {
+        const locationData = state.lineChartData.filter(
+          (item) =>
+            item.productName === productName && item.scanned === "completed"
+        );
+        const locationMetrics = this.aggregateMetricsByLocation(locationData);
+        return locationMetrics.reduce(
+          (max, curr) => (curr.count > max.count ? curr : max),
+          { count: 0 }
+        );
+      };
+    },
+    lowestCheckoutPerLocation(state) {
+      return (productName) => {
+        const locationData = state.lineChartData.filter(
+          (item) =>
+            item.productName === productName && item.scanned === "completed"
+        );
+        const locationMetrics = this.aggregateMetricsByLocation(locationData);
+        return locationMetrics.reduce(
+          (min, curr) => (curr.count < min.count ? curr : min),
+          { count: Infinity }
+        );
+      };
+    },
+    aggregateMetricsByLocation(state) {
+      return (data) => {
+        const metrics = {};
+
+        data.forEach((item) => {
+          const location = `${item.region}, ${item.city}, ${item.town}, ${item.locality}`;
+          if (!metrics[location]) {
+            metrics[location] = { location, count: 0 };
+          }
+          metrics[location].count++;
+        });
+
+        return Object.values(metrics);
+      };
+    },
+    // new code ends
     paginatedTrendz(state) {
       const start = (state.currentPageTrendz - 1) * state.pageSizeTrendz;
       const end = start + state.pageSizeTrendz;

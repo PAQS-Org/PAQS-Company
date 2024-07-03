@@ -179,7 +179,6 @@ export const useProdStore = defineStore({
     },
     ProdPost() {
       const num = 1;
-      console.log(num);
       return num * 2;
     },
     async updatecodes() {

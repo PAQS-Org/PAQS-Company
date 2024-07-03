@@ -114,7 +114,6 @@ const dayOptions = computed(() => {
       selectedMonth.value.value + 1,
       0
     ).getDate();
-    console.log("days", daysInMonth);
     return Array.from({ length: daysInMonth }, (v, k) => k + 1).map((day) => ({
       label: day,
       value: day,
@@ -123,13 +122,10 @@ const dayOptions = computed(() => {
   return [];
 });
 
-console.log("day options", dayOptions);
-
 const filteredData = computed(() => {
   const year = selectedYear.value ? parseInt(selectedYear.value) : null;
   const month = selectedMonth.value !== null ? selectedMonth.value.value : null;
   const day = selectedDay.value !== null ? selectedDay.value : null;
-  console.log(year, month, day);
   const filterCondition = (item) => {
     const date = new Date(item.timestamp);
     return (

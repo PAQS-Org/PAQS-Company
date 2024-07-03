@@ -9,7 +9,7 @@
             <card-stats
               stat-subtitle="TOTAL SCAN COMPLETE"
               :stat-title="totalScanComplete.total"
-              stat-arrow="up"
+              stat-arrow="../../../src/assets/img/svg/avg.svg"
               :stat-percent="totalScanComplete.average"
               stat-percent-color="text-emerald-500"
               :stat-descripiron="`For the month of ${currentMonth}`"
@@ -21,7 +21,7 @@
             <card-stats
               stat-subtitle="TOTAL SCAN"
               :stat-title="totalScan.total"
-              stat-arrow="down"
+              stat-arrow="../../../src/assets/img/svg/avg.svg"
               :stat-percent="totalScan.average"
               stat-percent-color="text-red-500"
               :stat-descripiron="`For the month of ${currentMonth}`"
@@ -33,8 +33,10 @@
             <card-stats
               stat-subtitle="TOP LOCATION"
               :stat-title="topLocation.location"
-              stat-arrow="down"
-              :stat-percent="topLocation.conversionRate"
+              stat-arrow="../../../src/assets/img/svg/cons.svg"
+              :stat-complete="`Checkout: ${topLocation.completed}`"
+              :stat-scan="`Scans: ${topLocation.scanned}`"
+              :stat-percent="`${topLocation.conversionRate} %`"
               stat-percent-color="text-orange-500"
               :stat-descripiron="topLocation.reigningProduct"
               stat-icon-name="fas fa-map-pin"

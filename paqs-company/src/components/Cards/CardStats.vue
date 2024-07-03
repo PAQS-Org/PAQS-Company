@@ -11,12 +11,18 @@
           <span class="font-semibold text-xl text-blueGray-700">
             {{ statTitle }}
           </span>
+          <br v-if="statComplete || statScan" />
+          <span
+            v-if="statComplete || statScan"
+            class="font-semibold text-xl text-blueGray-700"
+          >
+            {{ statComplete }} <span v-if="statComplete && statScan"> | </span>
+            {{ statScan }}
+          </span>
         </div>
         <div class="relative w-auto pl-4 flex-initial">
           <div
-            class="text-white p-3 text-center
-            inline-flex items-center justify-center
-            w-12 h-12 shadow-lg rounded-full"
+            class="text-white p-3 text-center inline-flex items-center justify-center w-12 h-12 shadow-lg rounded-full"
             :class="[statIconColor]"
           >
             <i :class="[statIconName]" />
@@ -24,16 +30,18 @@
         </div>
       </div>
       <p class="text-sm text-blueGray-400 mt-4">
-        <span
-          class="mr-2"
-          :class="[statPercentColor]"
-        >
-          <i
-            :class="[
-              statArrow === 'up' ? `fas fa-arrow-up` : `fas fa-arrow-down`,
-            ]"
-          />
-          {{ statPercent }}%
+        <span class="mr-2" :class="[statPercentColor]">
+          <template v-if="isSvg(statArrow)">
+            <img :src="statArrow" class="inline-block w-5 h-5 mr-2" />
+          </template>
+          <template v-else>
+            <i
+              :class="[
+                statArrow === 'up' ? `fas fa-arrow-up` : `fas fa-arrow-down`,
+              ]"
+            />
+          </template>
+          {{ statPercent }}
         </span>
         <span class="whitespace-nowrap">{{ statDescripiron }}</span>
       </p>
@@ -43,47 +51,57 @@
 <script>
 // import { fasAirFreshener } from '@quasar/extras/fontawesome-v5'
 export default {
-  name: 'CardStats',
+  name: "CardStats",
 
   props: {
     statSubtitle: {
       type: String,
-      default: 'Traffic',
+      default: "Traffic",
     },
     statTitle: {
-      type: String,
-      default: '350,897',
+      type: [String, Number],
+      default: 350897,
+    },
+    statComplete: {
+      type: [String, Number],
+      default: null,
+    },
+    statScan: {
+      type: [String, Number],
+      default: null,
     },
     statArrow: {
-      default: 'up',
-      validator(value) {
-        // The value must match one of these strings
-        return ['up', 'down'].indexOf(value) !== -1;
-      },
+      type: String,
+      default: "up",
     },
     statPercent: {
-      type: String,
-      default: '3.48',
+      type: [String, Number],
+      default: 3.48,
     },
     // can be any of the text color utilities
     // from tailwindcss
     statPercentColor: {
       type: String,
-      default: 'text-emerald-500',
+      default: "text-emerald-500",
     },
     statDescripiron: {
       type: String,
-      default: 'Since last month',
+      default: "Since last month",
     },
     statIconName: {
       type: String,
-      default: 'far fa-chart-bar',
+      default: "far fa-chart-bar",
     },
     // can be any of the background color utilities
     // from tailwindcss
     statIconColor: {
       type: String,
-      default: 'bg-red-500',
+      default: "bg-red-500",
+    },
+  },
+  methods: {
+    isSvg(value) {
+      return value.endsWith(".svg");
     },
   },
 };

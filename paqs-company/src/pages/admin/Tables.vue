@@ -29,7 +29,6 @@ const CardTable = defineAsyncComponent(() =>
 );
 
 const formatDate = (dateString) => {
-  console.log(dateString);
   const date = new Date(dateString);
   const options = {
     day: "2-digit",
