@@ -27,11 +27,20 @@ export const useTransactionStore = defineStore("transaction", {
     totalScanCompleteForMonth(state) {
       const currentMonth = state.lineChartrange.month;
       const currentYear = state.lineChartrange.year;
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       const completedData = state.lineChartData.filter((item) => {
         const date = new Date(item.timestamp);
+        const formattedDate = new Intl.DateTimeFormat("en-US", {
+          timeZone: userTimezone,
+          month: "numeric",
+          year: "numeric",
+        }).format(date);
+
+        const [formattedMonth, formattedYear] = formattedDate.split("/");
         return (
-          date.getMonth() === currentMonth &&
-          date.getFullYear() === currentYear &&
+          parseInt(formattedMonth) - 1 === currentMonth &&
+          parseInt(formattedYear) === currentYear &&
           item.scanned === "completed"
         );
       });
@@ -42,11 +51,21 @@ export const useTransactionStore = defineStore("transaction", {
     totalScanForMonth(state) {
       const currentMonth = state.lineChartrange.month;
       const currentYear = state.lineChartrange.year;
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       const scanData = state.lineChartData.filter((item) => {
         const date = new Date(item.timestamp);
+        const formattedDate = new Intl.DateTimeFormat("en-US", {
+          timeZone: userTimezone,
+          month: "numeric",
+          year: "numeric",
+        }).format(date);
+
+        const [formattedMonth, formattedYear] = formattedDate.split("/");
+
         return (
-          date.getMonth() === currentMonth &&
-          date.getFullYear() === currentYear &&
+          parseInt(formattedMonth) - 1 === currentMonth &&
+          parseInt(formattedYear) === currentYear &&
           item.scanned === "scanned"
         );
       });
@@ -54,8 +73,9 @@ export const useTransactionStore = defineStore("transaction", {
       const average = (total / scanData.length).toFixed(2) || 0;
       return { total, average };
     },
-
     topLocation(state) {
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       const locationData = state.lineChartData.reduce((acc, item) => {
         const location = `${item.region}, ${item.city}, ${item.town}`;
         if (!acc[location]) {
@@ -71,9 +91,17 @@ export const useTransactionStore = defineStore("transaction", {
         }
 
         const date = new Date(item.timestamp);
-        const day = date.toISOString().split("T")[0]; // YYYY-MM-DD format
-        const month = `${date.getFullYear()}-${date.getMonth() + 1}`; // YYYY-M format
-        const year = date.getFullYear(); // YYYY format
+        const day = new Intl.DateTimeFormat("en-US", {
+          timeZone: userTimezone,
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+        }).format(date);
+
+        const [dayYear, dayMonth, dayDay] = day.split("/");
+
+        const month = `${dayYear}-${dayMonth}`;
+        const year = dayYear;
 
         if (!acc[location].products[item.productName]) {
           acc[location].products[item.productName] = {
@@ -183,6 +211,8 @@ export const useTransactionStore = defineStore("transaction", {
       };
     },
     leastAndMedianLocations(state) {
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       const locationData = state.lineChartData.reduce((acc, item) => {
         const location = `${item.region}, ${item.city}, ${item.town}`;
         if (!acc[location]) {
@@ -198,9 +228,17 @@ export const useTransactionStore = defineStore("transaction", {
         }
 
         const date = new Date(item.timestamp);
-        const day = date.toISOString().split("T")[0]; // YYYY-MM-DD format
-        const month = `${date.getFullYear()}-${date.getMonth() + 1}`; // YYYY-M format
-        const year = date.getFullYear(); // YYYY format
+        const day = new Intl.DateTimeFormat("en-US", {
+          timeZone: userTimezone,
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+        }).format(date);
+
+        const [dayYear, dayMonth, dayDay] = day.split("/");
+
+        const month = `${dayYear}-${dayMonth}`;
+        const year = dayYear;
 
         if (!acc[location].products[item.productName]) {
           acc[location].products[item.productName] = {
@@ -239,22 +277,26 @@ export const useTransactionStore = defineStore("transaction", {
         return acc;
       }, {});
 
-      const locations = Object.keys(locationData);
-
-      const sortedLocations = locations.sort(
-        (a, b) => locationData[a].completed - locationData[b].completed
+      const sortedLocations = Object.keys(locationData).sort(
+        (a, b) => locationData[a]?.completed - locationData[b]?.completed
       );
+
       const medianIndex = Math.floor(sortedLocations.length / 2);
-
-      const leastLocation = sortedLocations[0];
       const medianLocation = sortedLocations[medianIndex];
+      const leastLocation = sortedLocations[0];
 
-      const getLocationData = (location) => {
-        const totalCompleted = locationData[location].completed;
-        const totalScanned = locationData[location].scanned;
-        const conversionRate = totalCompleted / (totalScanned + totalCompleted);
+      const medianLocationData = locationData[medianLocation];
+      const leastLocationData = locationData[leastLocation];
 
-        const dateRange = locationData[location].dates;
+      const getLocationStats = (locationData) => {
+        const totalCompleted = locationData.completed;
+        const totalScanned = locationData.scanned;
+        const conversionRate = (
+          totalCompleted /
+          (totalScanned + totalCompleted)
+        ).toFixed(2);
+
+        const dateRange = locationData.dates;
         const days =
           (Math.max(...dateRange) - Math.min(...dateRange)) /
             (1000 * 60 * 60 * 24) || 1;
@@ -262,7 +304,7 @@ export const useTransactionStore = defineStore("transaction", {
         const averagePerMonth = (averagePerDay * 30).toFixed(2);
         const averagePerYear = (averagePerDay * 365).toFixed(2);
 
-        const dailyStats = Object.entries(locationData[location].daily).map(
+        const dailyStats = Object.entries(locationData.daily).map(
           ([date, counts]) => ({
             date,
             completed: counts.completed,
@@ -270,7 +312,7 @@ export const useTransactionStore = defineStore("transaction", {
           })
         );
 
-        const monthlyStats = Object.entries(locationData[location].monthly).map(
+        const monthlyStats = Object.entries(locationData.monthly).map(
           ([date, counts]) => ({
             month: date,
             completed: counts.completed,
@@ -278,7 +320,7 @@ export const useTransactionStore = defineStore("transaction", {
           })
         );
 
-        const yearlyStats = Object.entries(locationData[location].yearly).map(
+        const yearlyStats = Object.entries(locationData.yearly).map(
           ([date, counts]) => ({
             year: date,
             completed: counts.completed,
@@ -286,19 +328,16 @@ export const useTransactionStore = defineStore("transaction", {
           })
         );
 
-        const reigningProduct = Object.keys(
-          locationData[location].products
-        ).reduce(
+        const reigningProduct = Object.keys(locationData.products).reduce(
           (a, b) =>
-            locationData[location].products[a].completed >
-            locationData[location].products[b].completed
+            locationData.products[a]?.completed >
+            locationData.products[b]?.completed
               ? a
               : b,
           ""
         );
 
         return {
-          location,
           completed: totalCompleted,
           scanned: totalScanned,
           conversionRate,
@@ -313,12 +352,19 @@ export const useTransactionStore = defineStore("transaction", {
       };
 
       return {
-        leastLocationData: getLocationData(leastLocation),
-        medianLocationData: getLocationData(medianLocation),
+        leastLocation: {
+          location: leastLocation,
+          ...getLocationStats(leastLocationData),
+        },
+        medianLocation: {
+          location: medianLocation,
+          ...getLocationStats(medianLocationData),
+        },
       };
     },
 
     // new code
+
     filterData(state) {
       return (condition) => state.lineChartData.filter(condition);
     },
@@ -354,7 +400,7 @@ export const useTransactionStore = defineStore("transaction", {
         prevYearMetrics,
       };
     },
-    calculateMetricsForPeriod(state, getters) {
+    calculateMetricsForPeriod(state) {
       return (date, period) => {
         const start = new Date(date);
         const end = new Date(date);
@@ -369,9 +415,12 @@ export const useTransactionStore = defineStore("transaction", {
           end.setFullYear(start.getFullYear() + 1);
         }
 
+        const localeStart = start.toLocaleDateString();
+        const localeEnd = end.toLocaleDateString();
+
         const filteredData = this.filterData((item) => {
-          const itemDate = new Date(item.timestamp);
-          return itemDate >= start && itemDate < end;
+          const itemDate = new Date(item.timestamp).toLocaleDateString();
+          return itemDate >= localeStart && itemDate < localeEnd;
         });
 
         const completedCount = filteredData.filter(
@@ -384,10 +433,17 @@ export const useTransactionStore = defineStore("transaction", {
         return { completedCount, scannedCount };
       };
     },
-    conversionRate(state, getters) {
-      return (metrics) => {
-        if (metrics.scannedCount === 0) return 0;
-        return (metrics.completedCount / metrics.scannedCount) * 100;
+    conversionRate(state) {
+      return (prodName) => {
+        const prodScan = state.lineChartData.filter(
+          (item) => item.productName === prodName && item.scanned === "scanned"
+        );
+        const prodComp = state.lineChartData.filter(
+          (item) =>
+            item.productName === prodName && item.scanned === "completed"
+        );
+        const convRate = ((prodComp.length / prodScan.length) * 100).toFixed(2);
+        return convRate;
       };
     },
     highestCheckout(state) {
@@ -450,7 +506,7 @@ export const useTransactionStore = defineStore("transaction", {
           const date = new Date(item.timestamp);
           let key;
           if (period === "day") {
-            key = date.toISOString().split("T")[0];
+            key = date.toLocaleDateString();
           } else if (period === "month") {
             key = `${date.getFullYear()}-${date.getMonth() + 1}`;
           } else if (period === "year") {
@@ -563,6 +619,12 @@ export const useTransactionStore = defineStore("transaction", {
     },
     setCurrentPageCust(page) {
       this.currentPageCust = page;
+    },
+    setMonth(newMonth) {
+      this.lineChartrange.month = newMonth;
+    },
+    setYear(newYear) {
+      this.lineChartrange.year = newYear;
     },
     async fetchTrends() {
       try {

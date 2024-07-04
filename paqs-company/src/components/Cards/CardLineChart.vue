@@ -71,7 +71,7 @@ import "chartjs-adapter-date-fns";
 import { enUS } from "date-fns/locale";
 import Chart from "chart.js/auto";
 import { useTransactionStore } from "src/stores/dataFeed";
-import { groupBy } from "lodash";
+// import { groupBy } from "lodash";
 
 const lineChart = ref("line-chart");
 const lineData = useTransactionStore();
@@ -108,10 +108,10 @@ const monthOptions = months.map((month, index) => ({
 }));
 
 const dayOptions = computed(() => {
-  if (selectedYear.value && selectedMonth.value.value !== null) {
+  if (selectedYear.value && selectedMonth.value !== null) {
     const daysInMonth = new Date(
       selectedYear.value,
-      selectedMonth.value.value + 1,
+      selectedMonth.value + 1,
       0
     ).getDate();
     return Array.from({ length: daysInMonth }, (v, k) => k + 1).map((day) => ({
@@ -146,14 +146,41 @@ const groupedData = computed(() => {
   const lineFiltered = filteredData.value;
 
   const groupData = (data) => {
-    return groupBy(data, (item) => {
+    const result = {};
+    data.forEach((item) => {
       const date = new Date(item.timestamp);
-      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+      const day = `${date.getFullYear()}-${
+        date.getMonth() + 1
+      }-${date.getDate()}`;
+      if (!result[day]) {
+        result[day] = { scanned: 0, completed: 0 };
+      }
+      result[day][item.scanned]++;
     });
+    return result;
   };
 
   return groupData(lineFiltered);
 });
+
+// const aggregatedData = computed(() => {
+//   const lineFiltered = filteredData.value;
+
+//   const aggregateData = (data) => {
+//     const result = {};
+//     data.forEach((item) => {
+//       const date = new Date(item.timestamp);
+//       const day = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+//       if (!result[day]) {
+//         result[day] = { scanned: 0, completed: 0 };
+//       }
+//       result[day][item.scanned]++;
+//     });
+//     return result;
+//   };
+
+//   return aggregateData(lineFiltered);
+// });
 
 const xLabels = computed(() => {
   return Object.keys(groupedData.value).sort(
@@ -179,22 +206,14 @@ const createChart = () => {
           label: "Total Scans",
           backgroundColor: "#4c51bf",
           borderColor: "#4c51bf",
-          data: xLabels.value.map((date) => {
-            return (groupedLine[date] || []).filter(
-              (item) => item.scanned === "scanned"
-            ).length;
-          }),
+          data: xLabels.value.map((date) => groupedLine[date]?.scanned || 0),
           fill: false,
         },
         {
           label: "Completed Scans",
           backgroundColor: "#ff6384",
           borderColor: "#ff6384",
-          data: xLabels.value.map((date) => {
-            return (groupedLine[date] || []).filter(
-              (item) => item.scanned === "completed"
-            ).length;
-          }),
+          data: xLabels.value.map((date) => groupedLine[date]?.completed || 0),
           fill: false,
         },
       ],

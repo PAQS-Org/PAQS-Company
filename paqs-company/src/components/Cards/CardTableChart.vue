@@ -140,10 +140,17 @@ const scanPerYear = computed(() => {
   return metrics ? metrics.count : 0;
 });
 
+// const conversionRate = computed(() => {
+//   if (!selectedProduct.value) return 0;
+//   const todayMetrics = prodInfo.checkoutMetrics.currentDayMetrics;
+//   return prodInfo.conversionRate(todayMetrics);
+// });
+
 const conversionRate = computed(() => {
   if (!selectedProduct.value) return 0;
-  const todayMetrics = prodInfo.checkoutMetrics.currentDayMetrics;
-  return prodInfo.conversionRate(todayMetrics);
+  // const today = new Date();
+  // const metrics = prodInfo.calculateMetricsForPeriod(today, "day");
+  return prodInfo.conversionRate(selectedProduct.value);
 });
 
 const highestCheckoutPerDay = computed(() => {
