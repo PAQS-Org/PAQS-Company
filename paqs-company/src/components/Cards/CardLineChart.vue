@@ -118,7 +118,6 @@ const dayOptions = computed(() => {
   }));
 });
 
-console.log("dayOpt", dayOptions);
 const filteredData = computed(() => {
   const year = selectedYear.value ? parseInt(selectedYear.value) : null;
   const month = selectedMonth.value !== null ? selectedMonth.value.value : null;
@@ -138,50 +137,6 @@ const filteredData = computed(() => {
 
   return lineFiltered;
 });
-
-// const groupedData = computed(() => {
-//   const lineFiltered = filteredData.value;
-
-//   const groupData = (data) => {
-//     const result = {};
-//     data.forEach((item) => {
-//       const date = new Date(item.timestamp);
-//       const day = `${date.getFullYear()}-${
-//         date.getMonth() + 1
-//       }-${date.getDate()}`;
-//       if (!result[day]) {
-//         result[day] = { scanned: 0, completed: 0 };
-//       }
-//       result[day][item.scanned]++;
-//     });
-//     return result;
-//   };
-
-//   return groupData(lineFiltered);
-// });
-
-// const groupedData = computed(() => {
-//   if (
-//     selectedYear.value &&
-//     selectedMonth.value !== null &&
-//     selectedDay.value !== null
-//   ) {
-//     return filteredData.value;
-//   } else {
-//     const result = {};
-//     filteredData.value.forEach((item) => {
-//       const date = new Date(item.timestamp);
-//       const day = `${date.getFullYear()}-${
-//         date.getMonth() + 1
-//       }-${date.getDate()}`;
-//       if (!result[day]) {
-//         result[day] = { scanned: 0, completed: 0 };
-//       }
-//       result[day][item.scanned]++;
-//     });
-//     return result;
-//   }
-// });
 
 const groupedData = computed(() => {
   const lineFiltered = filteredData.value;
@@ -221,20 +176,6 @@ const xLabels = computed(() => {
     (a, b) => new Date(a) - new Date(b)
   );
 });
-
-// const xLabels = computed(() => {
-//   if (
-//     selectedYear.value &&
-//     selectedMonth.value !== null &&
-//     selectedDay.value !== null
-//   ) {
-//     return filteredData.value.map((item) => new Date(item.timestamp));
-//   } else {
-//     return Object.keys(groupedData.value).sort(
-//       (a, b) => new Date(a) - new Date(b)
-//     );
-//   }
-// });
 
 const createChart = () => {
   const ctx = lineChart.value.getContext("2d");
