@@ -71,7 +71,11 @@ import "chartjs-adapter-date-fns";
 import { enUS } from "date-fns/locale";
 import Chart from "chart.js/auto";
 import { useTransactionStore } from "src/stores/dataFeed";
+import zoomPlugin from "chartjs-plugin-zoom";
+
 // import { groupBy } from "lodash";
+
+Chart.register(zoomPlugin);
 
 const lineChart = ref("line-chart");
 const lineData = useTransactionStore();
@@ -108,24 +112,17 @@ const monthOptions = months.map((month, index) => ({
 }));
 
 const dayOptions = computed(() => {
-  if (selectedYear.value && selectedMonth.value !== null) {
-    const daysInMonth = new Date(
-      selectedYear.value,
-      selectedMonth.value + 1,
-      0
-    ).getDate();
-    return Array.from({ length: daysInMonth }, (v, k) => k + 1).map((day) => ({
-      label: day,
-      value: day,
-    }));
-  }
-  return [];
+  return Array.from({ length: 31 }, (v, k) => k + 1).map((day) => ({
+    label: day,
+    value: day,
+  }));
 });
 
+console.log("dayOpt", dayOptions);
 const filteredData = computed(() => {
   const year = selectedYear.value ? parseInt(selectedYear.value) : null;
   const month = selectedMonth.value !== null ? selectedMonth.value.value : null;
-  const day = selectedDay.value !== null ? selectedDay.value : null;
+  const day = selectedDay.value !== null ? selectedDay.value.value : null;
   const filterCondition = (item) => {
     const date = new Date(item.timestamp);
     return (
@@ -142,35 +139,16 @@ const filteredData = computed(() => {
   return lineFiltered;
 });
 
-const groupedData = computed(() => {
-  const lineFiltered = filteredData.value;
-
-  const groupData = (data) => {
-    const result = {};
-    data.forEach((item) => {
-      const date = new Date(item.timestamp);
-      const day = `${date.getFullYear()}-${
-        date.getMonth() + 1
-      }-${date.getDate()}`;
-      if (!result[day]) {
-        result[day] = { scanned: 0, completed: 0 };
-      }
-      result[day][item.scanned]++;
-    });
-    return result;
-  };
-
-  return groupData(lineFiltered);
-});
-
-// const aggregatedData = computed(() => {
+// const groupedData = computed(() => {
 //   const lineFiltered = filteredData.value;
 
-//   const aggregateData = (data) => {
+//   const groupData = (data) => {
 //     const result = {};
 //     data.forEach((item) => {
 //       const date = new Date(item.timestamp);
-//       const day = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+//       const day = `${date.getFullYear()}-${
+//         date.getMonth() + 1
+//       }-${date.getDate()}`;
 //       if (!result[day]) {
 //         result[day] = { scanned: 0, completed: 0 };
 //       }
@@ -179,14 +157,84 @@ const groupedData = computed(() => {
 //     return result;
 //   };
 
-//   return aggregateData(lineFiltered);
+//   return groupData(lineFiltered);
 // });
+
+// const groupedData = computed(() => {
+//   if (
+//     selectedYear.value &&
+//     selectedMonth.value !== null &&
+//     selectedDay.value !== null
+//   ) {
+//     return filteredData.value;
+//   } else {
+//     const result = {};
+//     filteredData.value.forEach((item) => {
+//       const date = new Date(item.timestamp);
+//       const day = `${date.getFullYear()}-${
+//         date.getMonth() + 1
+//       }-${date.getDate()}`;
+//       if (!result[day]) {
+//         result[day] = { scanned: 0, completed: 0 };
+//       }
+//       result[day][item.scanned]++;
+//     });
+//     return result;
+//   }
+// });
+
+const groupedData = computed(() => {
+  const lineFiltered = filteredData.value;
+  const year = selectedYear.value ? parseInt(selectedYear.value) : null;
+  const month = selectedMonth.value !== null ? selectedMonth.value.value : null;
+  const day = selectedDay.value !== null ? selectedDay.value.value : null;
+
+  const groupData = (data) => {
+    const result = {};
+    data.forEach((item) => {
+      const date = new Date(item.timestamp);
+      let key;
+
+      if (year && month !== null && day !== null) {
+        key = `${date.getFullYear()}-${
+          date.getMonth() + 1
+        }-${date.getDate()} ${date.getHours()}:00`;
+      } else if (year && month !== null) {
+        key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+      } else {
+        key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+      }
+
+      if (!result[key]) {
+        result[key] = { scanned: 0, completed: 0 };
+      }
+      result[key][item.scanned]++;
+    });
+    return result;
+  };
+
+  return groupData(lineFiltered);
+});
 
 const xLabels = computed(() => {
   return Object.keys(groupedData.value).sort(
     (a, b) => new Date(a) - new Date(b)
   );
 });
+
+// const xLabels = computed(() => {
+//   if (
+//     selectedYear.value &&
+//     selectedMonth.value !== null &&
+//     selectedDay.value !== null
+//   ) {
+//     return filteredData.value.map((item) => new Date(item.timestamp));
+//   } else {
+//     return Object.keys(groupedData.value).sort(
+//       (a, b) => new Date(a) - new Date(b)
+//     );
+//   }
+// });
 
 const createChart = () => {
   const ctx = lineChart.value.getContext("2d");
@@ -208,6 +256,7 @@ const createChart = () => {
           borderColor: "#4c51bf",
           data: xLabels.value.map((date) => groupedLine[date]?.scanned || 0),
           fill: false,
+          tension: 0.1,
         },
         {
           label: "Completed Scans",
@@ -215,6 +264,7 @@ const createChart = () => {
           borderColor: "#ff6384",
           data: xLabels.value.map((date) => groupedLine[date]?.completed || 0),
           fill: false,
+          tension: 0.1,
         },
       ],
     },
@@ -224,6 +274,9 @@ const createChart = () => {
       scales: {
         x: {
           type: "category",
+          time: {
+            unit: selectedDay.value !== null ? "hour" : "day",
+          },
           adapters: {
             date: {
               locale: enUS,
@@ -243,6 +296,19 @@ const createChart = () => {
           },
           grid: {
             color: "rgba(255, 255, 255, 0.15)",
+          },
+        },
+      },
+      plugins: {
+        zoom: {
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            pinch: {
+              enabled: true,
+            },
+            mode: "xy",
           },
         },
       },
