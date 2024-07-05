@@ -33,24 +33,30 @@
       <div class="w-full xl:w-6/12 mb-12 xl:mb-0 px-4">
         <DetailCard
           :first-title="'Checkout Today'"
-          :first-title-val="checkoutPerDay"
+          :first-title-val="checkoutToday"
+          :first-title-val1="checkoutPrevDay"
           first-icon="fas fa-calendar-day"
           :second-title="'Checkout this Month'"
-          :second-title-val="checkoutPerMonth"
+          :second-title-val="checkoutMonth"
+          :second-title-val1="checkoutPrevMonth"
           second-icon="fas fa-calendar-days"
           :third-title="'Checkout this Year'"
-          :third-title-val="checkoutPerYear"
+          :third-title-val="checkoutYear"
+          :third-title-val1="checkoutPrevYear"
           third-icon="fas fa-calendar"
           :fourth-title="'Scan Today'"
-          :fourth-title-val="scanPerDay"
+          :fourth-title-val="ScanToday"
+          :fourth-title-val1="ScanPrevToday"
           fourth-icon="fas fa-calendar-day"
           fourth-icon-color="color:#0080ff"
           :fifth-title="'Scan this Month'"
-          :fifth-title-val="scanPerMonth"
+          :fifth-title-val="ScanMonth"
+          :fifth-title-val1="ScanPrevMonth"
           fifth-icon="fas fa-calendar-days"
           fifth-icon-color="color:#0080ff"
           :sixth-title="'Scan this Year'"
-          :sixth-title-val="scanPerYear"
+          :sixth-title-val="ScanYear"
+          :sixth-title-val1="ScanPrevYear"
           sixth-icon="fas fa-calendar"
           sixth-icon-color="color:#0080ff"
         />
@@ -58,18 +64,27 @@
       <div class="w-full xl:w-6/12 mb-12 xl:mb-0 px-4">
         <DetailCard
           :first-title="'Conversion rate'"
-          :first-title-val="conversionRate"
+          :first-title-val="`${conversionRate} %`"
           first-icon-plus="../../../src/assets/img/svg/cons.svg"
           :second-title="'Highest Checkout'"
-          :second-title-val="highestCheckoutPerDay"
+          :second-title3="highestCheckoutMonth"
+          :second-title-val3="highestCheckoutMonthVal"
+          :second-title4="highestCheckoutYear"
+          :second-title-val4="highestCheckoutYearVal"
           :third-title="'Lowest Checkout'"
-          :third-title-val="lowestCheckoutPerDay"
+          :third-title3="lowestCheckoutMonth"
+          :third-title-val3="lowestCheckoutMonthVal"
+          :third-title4="lowestCheckoutYear"
+          :third-title-val4="lowestCheckoutYearVal"
           :fourth-title="'Highest Checkout Per Location'"
-          :fourth-title-val="highestCheckoutPerLocation"
+          :fourth-title-val="highestCheckoutPerLocationVal"
+          :fourth-title-val2="highestCheckoutPerLocation"
           :fifth-title="'Median Checkout Per Location'"
-          :fifth-title-val="medianCheckoutPerLocation"
+          :fifth-title-val="medianCheckoutPerLocationVal"
+          :fifth-title-val2="medianCheckoutPerLocation"
           :sixth-title="'Lowest Checkout Per Location'"
-          :sixth-title-val="lowestCheckoutPerLocation"
+          :sixth-title-val="lowestCheckoutPerLocationVal"
+          :sixth-title-val2="lowestCheckoutPerLocation"
           fourth-icon="fas fa-up-long"
           fourth-icon-color="color:#00FF00"
           fifth-icon="fas fa-minus"
@@ -97,91 +112,179 @@ const distinctProducts = computed(() => {
     .sort((a, b) => a - b);
 });
 
-// const productStats = computed(() => {
-//   if (!selectedProduct.value) return {};
-//   return prodInfo.productMetrics[selectedProduct.value] || {};
-// });
-
-const checkoutPerDay = computed(() => {
+const checkoutToday = computed(() => {
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.highestCheckout(selectedProduct.value).highestDaily;
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).completed
+    .currentDayMetrics;
+  return metrics;
 });
-
-const checkoutPerMonth = computed(() => {
+const checkoutPrevDay = computed(() => {
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.highestCheckout(
-    selectedProduct.value
-  ).highestMonthly;
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).completed
+    .prevDayMetrics;
+  return metrics;
 });
-
-const checkoutPerYear = computed(() => {
+const checkoutMonth = computed(() => {
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.highestCheckout(selectedProduct.value).highestYearly;
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).completed
+    .currentMonthMetrics;
+  return metrics;
 });
-
-const scanPerDay = computed(() => {
+const checkoutPrevMonth = computed(() => {
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.lowestCheckout(selectedProduct.value).lowestDaily;
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).completed
+    .prevMonthMetrics;
+  return metrics;
 });
-
-const scanPerMonth = computed(() => {
+const checkoutYear = computed(() => {
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.lowestCheckout(selectedProduct.value).lowestMonthly;
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).completed
+    .currentYearMetrics;
+  return metrics;
 });
-
-const scanPerYear = computed(() => {
+const checkoutPrevYear = computed(() => {
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.lowestCheckout(selectedProduct.value).lowestYearly;
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).completed
+    .prevYearMetrics;
+  return metrics;
 });
-
-// const conversionRate = computed(() => {
-//   if (!selectedProduct.value) return 0;
-//   const todayMetrics = prodInfo.checkoutMetrics.currentDayMetrics;
-//   return prodInfo.conversionRate(todayMetrics);
-// });
+const ScanToday = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).scanned
+    .currentDayMetrics;
+  return metrics;
+});
+const ScanPrevToday = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).scanned
+    .prevDayMetrics;
+  return metrics;
+});
+const ScanMonth = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).scanned
+    .currentMonthMetrics;
+  return metrics;
+});
+const ScanPrevMonth = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).scanned
+    .prevMonthMetrics;
+  return metrics;
+});
+const ScanYear = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).scanned
+    .currentYearMetrics;
+  return metrics;
+});
+const ScanPrevYear = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.checkoutMetrics(selectedProduct.value).scanned
+    .prevYearMetrics;
+  return metrics;
+});
 
 const conversionRate = computed(() => {
   if (!selectedProduct.value) return 0;
-  // const today = new Date();
-  // const metrics = prodInfo.calculateMetricsForPeriod(today, "day");
   return prodInfo.conversionRate(selectedProduct.value);
 });
 
-const highestCheckoutPerDay = computed(() => {
+const highestCheckoutMonth = computed(() => {
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.highestCheckout(selectedProduct.value).highestDaily;
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.highestCheckout(selectedProduct.value).highestMonthly
+    .month;
+  return metrics;
+});
+const highestCheckoutMonthVal = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.highestCheckout(selectedProduct.value).highestMonthly
+    .count;
+  return metrics;
+});
+const highestCheckoutYear = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.highestCheckout(selectedProduct.value).highestYearly
+    .year;
+  return metrics;
+});
+const highestCheckoutYearVal = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.highestCheckout(selectedProduct.value).highestYearly
+    .count;
+  return metrics;
 });
 
-const lowestCheckoutPerDay = computed(() => {
+const lowestCheckoutMonth = computed(() => {
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.lowestCheckout(selectedProduct.value).lowestDaily;
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.lowestCheckout(selectedProduct.value).lowestMonthly
+    .month;
+  return metrics;
+});
+const lowestCheckoutMonthVal = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.lowestCheckout(selectedProduct.value).lowestMonthly
+    .count;
+  return metrics;
+});
+const lowestCheckoutYear = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.lowestCheckout(selectedProduct.value).lowestYearly
+    .year;
+  return metrics;
+});
+const lowestCheckoutYearVal = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.lowestCheckout(selectedProduct.value).lowestYearly
+    .count;
+  return metrics;
 });
 
 const highestCheckoutPerLocation = computed(() => {
+  // This should calculate the median; currently using highest as placeholder
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.highestCheckoutPerLocation(selectedProduct.value);
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.highestCheckoutPerLocation(
+    selectedProduct.value
+  ).location;
+  return metrics;
+});
+const highestCheckoutPerLocationVal = computed(() => {
+  // This should calculate the median; currently using highest as placeholder
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.highestCheckoutPerLocation(
+    selectedProduct.value
+  ).count;
+  return metrics;
 });
 
 const medianCheckoutPerLocation = computed(() => {
-  // This should calculate the median; currently using highest as placeholder
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.highestCheckoutPerLocation(selectedProduct.value);
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.medianCheckoutPerLocation(
+    selectedProduct.value
+  ).location;
+  return metrics;
+});
+const medianCheckoutPerLocationVal = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.medianCheckoutPerLocation(
+    selectedProduct.value
+  ).count;
+  return metrics;
 });
 
 const lowestCheckoutPerLocation = computed(() => {
   if (!selectedProduct.value) return 0;
-  const metrics = prodInfo.lowestCheckoutPerLocation(selectedProduct.value);
-  return metrics ? metrics.count : 0;
+  const metrics = prodInfo.lowestCheckoutPerLocation(
+    selectedProduct.value
+  ).location;
+  return metrics;
+});
+const lowestCheckoutPerLocationVal = computed(() => {
+  if (!selectedProduct.value) return 0;
+  const metrics = prodInfo.lowestCheckoutPerLocation(
+    selectedProduct.value
+  ).count;
+  return metrics;
 });
 
 const updateStats = (value) => {

@@ -370,38 +370,68 @@ export const useTransactionStore = defineStore("transaction", {
     },
     // Calculate metrics for the current and previous day, month, and year
     checkoutMetrics(state, getters) {
-      const today = new Date();
-      const prevDay = new Date(today);
-      prevDay.setDate(today.getDate() - 1);
-      const prevMonth = new Date(today);
-      prevMonth.setMonth(today.getMonth() - 1);
-      const prevYear = new Date(today);
-      prevYear.setFullYear(today.getFullYear() - 1);
+      return (productName) => {
+        const today = new Date();
+        const prevDay = new Date(today);
+        prevDay.setDate(today.getDate() - 1);
+        const prevMonth = new Date(today);
+        prevMonth.setMonth(today.getMonth() - 1);
+        const prevYear = new Date(today);
+        prevYear.setFullYear(today.getFullYear() - 1);
 
-      const currentDayMetrics = this.calculateMetricsForPeriod(today, "day");
-      const prevDayMetrics = this.calculateMetricsForPeriod(prevDay, "day");
-      const currentMonthMetrics = this.calculateMetricsForPeriod(
-        today,
-        "month"
-      );
-      const prevMonthMetrics = this.calculateMetricsForPeriod(
-        prevMonth,
-        "month"
-      );
-      const currentYearMetrics = this.calculateMetricsForPeriod(today, "year");
-      const prevYearMetrics = this.calculateMetricsForPeriod(prevYear, "year");
-
-      return {
-        currentDayMetrics,
-        prevDayMetrics,
-        currentMonthMetrics,
-        prevMonthMetrics,
-        currentYearMetrics,
-        prevYearMetrics,
+        const currentDayMetrics = this.calculateMetricsForPeriod(
+          today,
+          "day",
+          productName
+        );
+        const prevDayMetrics = this.calculateMetricsForPeriod(
+          prevDay,
+          "day",
+          productName
+        );
+        const currentMonthMetrics = this.calculateMetricsForPeriod(
+          today,
+          "month",
+          productName
+        );
+        const prevMonthMetrics = this.calculateMetricsForPeriod(
+          prevMonth,
+          "month",
+          productName
+        );
+        const currentYearMetrics = this.calculateMetricsForPeriod(
+          today,
+          "year",
+          productName
+        );
+        const prevYearMetrics = this.calculateMetricsForPeriod(
+          prevYear,
+          "year",
+          productName
+        );
+        return {
+          scanned: {
+            currentDayMetrics: currentDayMetrics.scannedCount,
+            prevDayMetrics: prevDayMetrics.scannedCount,
+            currentMonthMetrics: currentMonthMetrics.scannedCount,
+            prevMonthMetrics: prevMonthMetrics.scannedCount,
+            currentYearMetrics: currentYearMetrics.scannedCount,
+            prevYearMetrics: prevYearMetrics.scannedCount,
+          },
+          completed: {
+            currentDayMetrics: currentDayMetrics.completedCount,
+            prevDayMetrics: prevDayMetrics.completedCount,
+            currentMonthMetrics: currentMonthMetrics.completedCount,
+            prevMonthMetrics: prevMonthMetrics.completedCount,
+            currentYearMetrics: currentYearMetrics.completedCount,
+            prevYearMetrics: prevYearMetrics.completedCount,
+          },
+        };
       };
     },
+
     calculateMetricsForPeriod(state) {
-      return (date, period) => {
+      return (date, period, productName) => {
         const start = new Date(date);
         const end = new Date(date);
 
@@ -415,12 +445,15 @@ export const useTransactionStore = defineStore("transaction", {
           end.setFullYear(start.getFullYear() + 1);
         }
 
-        const localeStart = start.toLocaleDateString();
-        const localeEnd = end.toLocaleDateString();
-
-        const filteredData = this.filterData((item) => {
-          const itemDate = new Date(item.timestamp).toLocaleDateString();
-          return itemDate >= localeStart && itemDate < localeEnd;
+        const startTime = start.getTime();
+        const endTime = end.getTime();
+        const filteredData = state.lineChartData.filter((item) => {
+          const itemDate = new Date(item.timestamp).getTime();
+          return (
+            itemDate >= startTime &&
+            itemDate < endTime &&
+            item.productName === productName
+          );
         });
 
         const completedCount = filteredData.filter(
@@ -433,6 +466,7 @@ export const useTransactionStore = defineStore("transaction", {
         return { completedCount, scannedCount };
       };
     },
+
     conversionRate(state) {
       return (prodName) => {
         const prodScan = state.lineChartData.filter(
@@ -442,8 +476,14 @@ export const useTransactionStore = defineStore("transaction", {
           (item) =>
             item.productName === prodName && item.scanned === "completed"
         );
-        const convRate = ((prodComp.length / prodScan.length) * 100).toFixed(2);
-        return convRate;
+        if (prodScan.length > 0) {
+          const convRate = ((prodComp.length / prodScan.length) * 100).toFixed(
+            2
+          );
+          return convRate;
+        } else {
+          return null;
+        }
       };
     },
     highestCheckout(state) {
@@ -468,8 +508,17 @@ export const useTransactionStore = defineStore("transaction", {
           (max, curr) => (curr.count > max.count ? curr : max),
           { count: 0 }
         );
-
-        return { highestDaily, highestMonthly, highestYearly };
+        return {
+          highestDaily: { date: highestDaily.date, count: highestDaily.count },
+          highestMonthly: {
+            month: highestMonthly.date,
+            count: highestMonthly.count,
+          },
+          highestYearly: {
+            year: highestYearly.date,
+            count: highestYearly.count,
+          },
+        };
       };
     },
     lowestCheckout(state) {
@@ -495,12 +544,34 @@ export const useTransactionStore = defineStore("transaction", {
           { count: Infinity }
         );
 
-        return { lowestDaily, lowestMonthly, lowestYearly };
+        return {
+          lowestDaily: { date: lowestDaily.date, count: lowestDaily.count },
+          lowestMonthly: {
+            month: lowestMonthly.date,
+            count: lowestMonthly.count,
+          },
+          lowestYearly: { year: lowestYearly.date, count: lowestYearly.count },
+        };
       };
     },
+
     aggregateMetrics(state) {
       return (data, period) => {
         const metrics = {};
+        const monthNames = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
 
         data.forEach((item) => {
           const date = new Date(item.timestamp);
@@ -508,9 +579,9 @@ export const useTransactionStore = defineStore("transaction", {
           if (period === "day") {
             key = date.toLocaleDateString();
           } else if (period === "month") {
-            key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+            key = `${monthNames[date.getMonth()]}-${date.getFullYear()}`;
           } else if (period === "year") {
-            key = date.getFullYear();
+            key = date.getFullYear().toString();
           }
 
           if (!metrics[key]) {
@@ -523,6 +594,7 @@ export const useTransactionStore = defineStore("transaction", {
         return Object.values(metrics);
       };
     },
+
     highestCheckoutPerLocation(state) {
       return (productName) => {
         const locationData = state.lineChartData.filter(
@@ -530,10 +602,14 @@ export const useTransactionStore = defineStore("transaction", {
             item.productName === productName && item.scanned === "completed"
         );
         const locationMetrics = this.aggregateMetricsByLocation(locationData);
-        return locationMetrics.reduce(
+        const highestLocation = locationMetrics.reduce(
           (max, curr) => (curr.count > max.count ? curr : max),
           { count: 0 }
         );
+        return {
+          location: highestLocation.location,
+          count: highestLocation.count,
+        };
       };
     },
     lowestCheckoutPerLocation(state) {
@@ -543,12 +619,48 @@ export const useTransactionStore = defineStore("transaction", {
             item.productName === productName && item.scanned === "completed"
         );
         const locationMetrics = this.aggregateMetricsByLocation(locationData);
-        return locationMetrics.reduce(
+        const lowestLocation = locationMetrics.reduce(
           (min, curr) => (curr.count < min.count ? curr : min),
           { count: Infinity }
         );
+
+        return {
+          location: lowestLocation.location,
+          count: lowestLocation.count,
+        };
       };
     },
+    medianCheckoutPerLocation(state) {
+      return (productName) => {
+        const locationData = state.lineChartData.filter(
+          (item) =>
+            item.productName === productName && item.scanned === "completed"
+        );
+        const locationMetrics = this.aggregateMetricsByLocation(locationData);
+
+        // Sort the location metrics by count
+        const sortedMetrics = locationMetrics.sort((a, b) => a.count - b.count);
+
+        // Find the median
+        const mid = Math.floor(sortedMetrics.length / 2);
+        const medianLocation =
+          sortedMetrics.length % 2 === 0
+            ? {
+                location: `${sortedMetrics[mid - 1].location} & ${
+                  sortedMetrics[mid].location
+                }`,
+                count:
+                  (sortedMetrics[mid - 1].count + sortedMetrics[mid].count) / 2,
+              }
+            : sortedMetrics[mid];
+
+        return {
+          location: medianLocation.location,
+          count: medianLocation.count,
+        };
+      };
+    },
+
     aggregateMetricsByLocation(state) {
       return (data) => {
         const metrics = {};
