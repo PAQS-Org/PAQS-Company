@@ -53,11 +53,6 @@ const routes = [
         component: () => import("pages/admin/Dashboard.vue"),
       },
       {
-        path: "maps",
-        name: "maps",
-        component: () => import("pages/admin/Maps.vue"),
-      },
-      {
         path: "scan",
         name: "scan",
         component: () => import("pages/admin/Scan.vue"),
