@@ -60,7 +60,7 @@ module.exports = configure(function (/* ctx */) {
       // ignorePublicFolder: true,
       // minify: false,
       // polyfillModulePreload: true,
-      // distDir
+      distDir: "dist/pwa",
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
