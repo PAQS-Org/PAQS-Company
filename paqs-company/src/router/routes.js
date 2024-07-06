@@ -58,11 +58,6 @@ const routes = [
         component: () => import("pages/admin/Scan.vue"),
       },
       {
-        path: "settings",
-        name: "settings",
-        component: () => import("pages/admin/Settings.vue"),
-      },
-      {
         path: "generate",
         name: "GCode",
         component: () => import("pages/admin/GenerateQR.vue"),
