@@ -9,10 +9,9 @@
           <div class="flex flex-wrap items-center">
             <div class="relative w-auto flex-initial">
               <div
-                class="p-3 text-white text-center inline-flex items-center justify-center w-12 h-12 shadow-lg rounded-full"
-                :class="[statIconColor]"
+                class="p-3 text-center inline-flex items-center justify-center w-6 h-6 shadow-lg rounded-full"
               >
-                <i :class="[statIconName]" />
+                <i :style="[iconColor]" :class="[statIconName]" />
               </div>
             </div>
             <h5 class="text-blueGray-400 q-pl-sm uppercase font-bold text-xs">
@@ -23,7 +22,7 @@
           <!-- Large number on card + -->
           <div class="pt-1">
             <span
-              style="font-size: 5rem; line-height: 4rem"
+              style="font-size: 3rem; line-height: 4rem"
               class="font-semibold text-blueGray-700"
             >
               {{ statTitle }}
@@ -123,9 +122,14 @@ export default {
     },
     // can be any of the background color utilities
     // from tailwindcss
+
     statIconColor: {
       type: String,
       default: "bg-red-500",
+    },
+    iconColor: {
+      type: String,
+      default: null,
     },
   },
   methods: {

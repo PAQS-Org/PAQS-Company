@@ -15,7 +15,7 @@ export const useTransactionStore = defineStore("transaction", {
     },
     loyalCust: [],
     trendProducts: [],
-    transactions: [],
+    transactions: JSON.parse(localStorage.getItem("transactionData")) || [],
     currentPageTrendz: 1,
     pageSizeTrendz: 5,
     currentPage: 1,
@@ -862,20 +862,15 @@ export const useTransactionStore = defineStore("transaction", {
   actions: {
     async fetchTransactions() {
       try {
-        const storedData = localStorage.getItem("transactionData");
-        if (storedData) {
-          this.transactions = JSON.parse(storedData);
-        } else {
-          const response = await getData.getReceipts();
-          this.transactions = response.data.results.map((item) => ({
-            ...item,
-            download: `http://127.0.0.1:8000/payment/receipt/${item.transaction_id}/`,
-          }));
-          localStorage.setItem(
-            "transactionData",
-            JSON.stringify(this.transactions)
-          );
-        }
+        const response = await getData.getReceipts();
+        this.transactions = response.data.results.map((item) => ({
+          ...item,
+          download: `http://127.0.0.1:8000/payment/receipt/${item.transaction_id}/`,
+        }));
+        localStorage.setItem(
+          "transactionData",
+          JSON.stringify(this.transactions)
+        );
       } catch (error) {
         console.error("Error fetching transaction data:", error);
       }

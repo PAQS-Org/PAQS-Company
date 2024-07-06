@@ -143,6 +143,7 @@ export const useProdStore = defineStore({
             email: this.payInfo.email,
             quantity: this.prodInfo.quantity,
             product_name: this.prodInfo.prodName,
+            batch_number: this.prodInfo.batchCode,
           },
           { headers }
         );

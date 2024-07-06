@@ -11,7 +11,14 @@
       />
     </div>
     <div class="w-full mb-12 px-4">
-      <card-table :titles="t2" :columns="columns2" :rows="row2" />
+      <card-table
+        :titles="t2"
+        :columns="columns2"
+        :rows="paginatedTransactions"
+        @page-changed="handlePageChange"
+        :current-page="currentPage"
+        :total-pages="totalPages"
+      />
     </div>
   </div>
 </template>
@@ -144,7 +151,8 @@ const handlePageChange = (page) => {
   transactionStore.setCurrentPage(page);
 };
 
-onMounted(() => {
-  transactionStore.fetchTransactions();
+onMounted(async () => {
+  console.log("his");
+  await transactionStore.fetchTransactions();
 });
 </script>

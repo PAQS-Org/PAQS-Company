@@ -14,7 +14,7 @@
               stat-percent-color="text-emerald-500"
               :stat-descripiron="`Year-to-Date (YTD) for the month of ${currentMonth}`"
               stat-icon-name="fas fa-bolt"
-              stat-icon-color="bg-red-500"
+              icon-color="color:#3e92d1"
             />
           </div>
           <div class="w-full lg:w-6/12 xl:w-3/12 px-4" v-if="totalScan">
@@ -26,7 +26,7 @@
               stat-percent-color="text-red-500"
               :stat-descripiron="`Year-to-Date (YTD) for the month of ${currentMonth}`"
               stat-icon-name="fas fa-qrcode"
-              stat-icon-color="bg-orange-500"
+              icon-color="color:#e59400"
             />
           </div>
           <div class="w-full lg:w-6/12 xl:w-3/12 px-4" v-if="topLocation">
@@ -40,7 +40,7 @@
               stat-percent-color="text-orange-500"
               :stat-descripiron="`Product Name: ${topLocation.reigningProduct}`"
               stat-icon-name="fas fa-map-pin"
-              stat-icon-color="bg-pink-500"
+              icon-color="color: #c3352b"
             />
           </div>
           <div class="w-full lg:w-6/12 xl:w-3/12 px-4">
@@ -52,7 +52,7 @@
               stat-percent-color="text-emerald-500"
               :stat-descripiron="`Best performing moment: ${genPerformance.bestMonth.monthYear}`"
               stat-icon-name="fas fa-percent"
-              stat-icon-color="bg-emerald-500"
+              icon-color="color:#009c4a"
             />
           </div>
         </div>

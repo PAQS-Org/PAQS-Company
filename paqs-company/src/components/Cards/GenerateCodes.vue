@@ -737,6 +737,7 @@ export default defineComponent({
           prods.prodInfo.qrType = "";
           prods.prodInfo.quantity = "";
           prods.payInfo.phoneNumber = "";
+          accept.value = false;
           prods.total = 0;
           stepperRef.value.goTo(1); // Go back to step 1
           // Reset any other necessary variables or states

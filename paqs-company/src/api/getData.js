@@ -1,5 +1,4 @@
 import { $axios } from "boot/axios";
-import axios from "axios";
 
 const getData = {
   getReceipts: (data) => $axios.get("payment/invoice/", data),
