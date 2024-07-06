@@ -24,12 +24,125 @@ export const useTransactionStore = defineStore("transaction", {
     pageSizeCust: 5,
   }),
   getters: {
-    totalScanCompleteForMonth(state) {
-      const currentMonth = state.lineChartrange.month;
+    getCompanyStatistics(state) {
+      if (!state.lineChartData.length) {
+        console.log("greeee");
+        return {
+          totalCompleted: 0,
+          bestMonth: { monthYear: "", count: 0 },
+          ema: [],
+        };
+      }
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      let completedCounts = {};
+      let totalCompleted = 0;
+      let completedYearCounts = {};
+      let totalScans = {};
+
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
+      state.lineChartData.forEach((item) => {
+        const date = new Date(item.timestamp);
+        const year = date.getFullYear();
+
+        if (!completedYearCounts[year]) {
+          completedYearCounts[year] = 0;
+          totalScans[year] = 0;
+        }
+
+        if (item.scanned === "completed") {
+          completedYearCounts[year]++;
+        }
+
+        totalScans[year]++;
+      });
+
+      state.lineChartData.forEach((item) => {
+        if (item.scanned === "completed") {
+          const date = new Date(item.timestamp);
+          const formattedDate = new Intl.DateTimeFormat("en-US", {
+            timeZone: userTimezone,
+            month: "numeric",
+            year: "numeric",
+          }).format(date);
+
+          const [formattedMonth, formattedYear] = formattedDate.split("/");
+          const monthYear = `${monthNames[formattedMonth]}-${formattedYear}`;
+
+          if (!completedCounts[monthYear]) {
+            completedCounts[monthYear] = 0;
+          }
+          completedCounts[monthYear]++;
+          totalCompleted++;
+        }
+      });
+
+      let yearlyPerformance = Object.keys(completedYearCounts).map((year) => {
+        return {
+          year: year,
+          percentage: (
+            (completedYearCounts[year] / totalScans[year]) *
+            100
+          ).toFixed(2),
+        };
+      });
+
+      // Get the best performing year
+      let bestYear = yearlyPerformance.reduce(
+        (best, current) =>
+          current.percentage > best.percentage ? current : best,
+        { year: "", percentage: 0 }
+      );
+
+      // Convert completedCounts to an array of counts
+      let completedCountsArray = Object.entries(completedCounts).map(
+        ([key, value]) => ({
+          monthYear: key,
+          count: value,
+        })
+      );
+
+      // Sort by month-year to get a chronological order
+      completedCountsArray.sort(
+        (a, b) => new Date(`01-${a.monthYear}`) - new Date(`01-${b.monthYear}`)
+      );
+
+      // Get the best performing month
+      let bestMonth = completedCountsArray.reduce(
+        (best, current) => (current.count > best.count ? current : best),
+        {
+          monthYear: "",
+          count: 0,
+        }
+      );
+
+      return {
+        totalCompleted,
+        bestMonth,
+        bestYear,
+      };
+    },
+
+    totalScanCompleteForMonthAndYTD(state) {
+      const currentMonth = state.lineChartrange.month; // 0-based index for the current month
       const currentYear = state.lineChartrange.year;
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      const completedData = state.lineChartData.filter((item) => {
+      // Filter data for the current month
+      const completedDataForMonth = state.lineChartData.filter((item) => {
         const date = new Date(item.timestamp);
         const formattedDate = new Intl.DateTimeFormat("en-US", {
           timeZone: userTimezone,
@@ -44,16 +157,39 @@ export const useTransactionStore = defineStore("transaction", {
           item.scanned === "completed"
         );
       });
-      const total = completedData.length;
-      const average = (total / completedData.length).toFixed(2) || 0;
-      return { total, average };
+
+      const totalForMonth = completedDataForMonth.length;
+
+      // Filter data for the year-to-date (YTD)
+      const completedDataForYTD = state.lineChartData.filter((item) => {
+        const date = new Date(item.timestamp);
+        const formattedYear = new Intl.DateTimeFormat("en-US", {
+          timeZone: userTimezone,
+          year: "numeric",
+        }).format(date);
+
+        return (
+          parseInt(formattedYear) === currentYear &&
+          item.scanned === "completed"
+        );
+      });
+
+      const totalForYTD = completedDataForYTD.length;
+      const monthsElapsed = currentMonth + 1; // January is 0, so add 1 to get the count of months elapsed
+      const averageForYTD = (totalForYTD / monthsElapsed).toFixed(2);
+
+      return {
+        totalForMonth,
+        averageForYTD,
+      };
     },
-    totalScanForMonth(state) {
-      const currentMonth = state.lineChartrange.month;
+    totalScanForMonthAndYTD(state) {
+      const currentMonth = state.lineChartrange.month; // 0-based index for the current month
       const currentYear = state.lineChartrange.year;
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      const scanData = state.lineChartData.filter((item) => {
+      // Filter data for the current month
+      const scannedDataForMonth = state.lineChartData.filter((item) => {
         const date = new Date(item.timestamp);
         const formattedDate = new Intl.DateTimeFormat("en-US", {
           timeZone: userTimezone,
@@ -62,17 +198,38 @@ export const useTransactionStore = defineStore("transaction", {
         }).format(date);
 
         const [formattedMonth, formattedYear] = formattedDate.split("/");
-
         return (
           parseInt(formattedMonth) - 1 === currentMonth &&
           parseInt(formattedYear) === currentYear &&
           item.scanned === "scanned"
         );
       });
-      const total = scanData.length;
-      const average = (total / scanData.length).toFixed(2) || 0;
-      return { total, average };
+
+      const totalForMonth = scannedDataForMonth.length;
+
+      // Filter data for the year-to-date (YTD)
+      const scannedDataForYTD = state.lineChartData.filter((item) => {
+        const date = new Date(item.timestamp);
+        const formattedYear = new Intl.DateTimeFormat("en-US", {
+          timeZone: userTimezone,
+          year: "numeric",
+        }).format(date);
+
+        return (
+          parseInt(formattedYear) === currentYear && item.scanned === "scanned"
+        );
+      });
+
+      const totalForYTD = scannedDataForYTD.length;
+      const monthsElapsed = currentMonth + 1; // January is 0, so add 1 to get the count of months elapsed
+      const averageForYTD = (totalForYTD / monthsElapsed).toFixed(2);
+
+      return {
+        totalForMonth,
+        averageForYTD,
+      };
     },
+
     topLocation(state) {
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -161,7 +318,7 @@ export const useTransactionStore = defineStore("transaction", {
       const averagePerMonth = (averagePerDay * 30).toFixed(2);
       const averagePerYear = (averagePerDay * 365).toFixed(2);
 
-      const dailyStats = Object.entries(locationData[topLocation].daily).map(
+      const dailyStats = Object.entries(locationData[topLocation]?.daily).map(
         ([date, counts]) => ({
           date,
           completed: counts.completed,

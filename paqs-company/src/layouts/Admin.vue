@@ -105,12 +105,55 @@
           </div>
         </q-img>
       </q-drawer>
-
+      <q-header elevated reveal class="bg-grey-8" bordered>
+        <div class="constrain">
+          <q-banner
+            inline-actions
+            dense
+            class="bg-grey-8 text-white"
+            v-if="showInsatllbanner"
+          >
+            <b>Install PAQS-Company? </b>
+            <template v-slot:avatar>
+              <q-avatar
+                color="grey-9"
+                text-color="white"
+                icon="join_left"
+                font-size="22px"
+              ></q-avatar>
+            </template>
+            <template v-slot:action>
+              <q-btn
+                flat
+                label="Yes"
+                dense
+                class="q-px-sm"
+                @click="installApp"
+              />
+              <q-btn
+                flat
+                label="Later"
+                dense
+                class="q-px-sm"
+                @click="showInsatllbanner = false"
+              />
+              <q-btn
+                flat
+                label="Never"
+                dense
+                class="q-px-sm"
+                @click="neverShowInstallAppBanner"
+              />
+            </template>
+          </q-banner>
+        </div>
+      </q-header>
       <q-page-container>
         <q-page>
           <div class="relative bg-blueGray-100">
             <!-- <admin-navbar /> -->
             <header-stats />
+
             <div class="px-4 md:px-10 mx-auto w-full -m-24">
               <router-view />
               <footer-admin />
@@ -122,7 +165,8 @@
   </div>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth.js";
 import HeaderStats from "../components/Headers/HeaderStats.vue";
 import FooterAdmin from "../components/Footers/FooterAdmin.vue";
@@ -134,6 +178,48 @@ defineOptions({
 const drawer = ref(false);
 const miniState = ref(true);
 const authStore = useAuthStore();
+const $q = useQuasar();
+const showInsatllbanner = ref(false);
+let deferredPrompt;
+
+onMounted(() => {
+  let neverShowInstallBanner = $q.localStorage.getItem(
+    "neverShowInstallBanner"
+  );
+  if (!neverShowInstallBanner) {
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInsatllbanner.value = true;
+      setTimeout(() => {
+        showInsatllbanner.value = true;
+      }, 3000);
+    });
+  }
+});
+console.log("hi", showInsatllbanner);
+
+const installApp = () => {
+  // Hide the app provided install promotion
+  showInsatllbanner.value = false;
+
+  // Show the install prompt
+  deferredPrompt.prompt();
+  // Wait for the user to respond to the prompt
+  deferredPrompt.userChoice.then((choiceResult) => {
+    if (choiceResult.outcome === "accepted") {
+      console.log("User accepted the install prompt");
+      neverShowAppInstallBanner();
+    } else {
+      console.log("User dismissed the install prompt");
+    }
+  });
+};
+
+const neverShowInstallAppBanner = () => {
+  showInsatllbanner.value = false;
+  $q.localStorage.set("neverShowInstallBanner", true);
+};
 
 const logoutSys = async () => {
   await authStore.logout();

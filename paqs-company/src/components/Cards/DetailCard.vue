@@ -295,7 +295,7 @@ const props = defineProps({
   //   default: null,
   // },
   secondTitle3: {
-    type: [String],
+    type: [String, Number],
     default: null,
   },
   secondTitleVal3: {
@@ -303,7 +303,7 @@ const props = defineProps({
     default: null,
   },
   secondTitle4: {
-    type: [String],
+    type: [String, Number],
     default: null,
   },
   secondTitleVal4: {
@@ -323,7 +323,7 @@ const props = defineProps({
     default: null,
   },
   thirdTitle3: {
-    type: [String],
+    type: [String, Number],
     default: null,
   },
   thirdTitleVal3: {
@@ -331,7 +331,7 @@ const props = defineProps({
     default: null,
   },
   thirdTitle4: {
-    type: [String],
+    type: [String, Number],
     default: null,
   },
   thirdTitleVal4: {
