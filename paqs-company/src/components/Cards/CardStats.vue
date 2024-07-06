@@ -53,7 +53,7 @@
         </div>
         <div class="flex items-center">
           <p
-            style="font-size: 1.9rem; line-height: 2.3rem"
+            style="font-size: 1.5rem; line-height: 2.3rem"
             class="text-blueGray-400 mt-1"
           >
             <span class="mr-2" :class="[statPercentColor]">

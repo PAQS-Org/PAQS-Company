@@ -24,16 +24,9 @@
         animated
       >
         <!-- Step 1 -->
-        <q-step
-          :name="1"
-          title="Product Info"
-          icon="feed"
-          :done="step > 1"
-        >
+        <q-step :name="1" title="Product Info" icon="feed" :done="step > 1">
           <div class="flex flex-wrap flex-center">
-            <h1 class="text-2xl">
-              Requisition
-            </h1>
+            <h1 class="text-2xl">Requisition</h1>
           </div>
           <div class="q-gutter-md">
             <div class="m-8">
@@ -43,7 +36,9 @@
                 outlined
                 color="purple-12"
                 label="Name of Product"
-                :rules="[val => val && val.length > 0 || 'Enter the product name']"
+                :rules="[
+                  (val) => (val && val.length > 0) || 'Enter the product name',
+                ]"
               >
                 <template #prepend>
                   <q-icon name="inventory" />
@@ -56,7 +51,9 @@
                 outlined
                 color="purple-12"
                 label="Batch Code"
-                :rules="[val => val && val.length > 0 || 'Enter the batch code']"
+                :rules="[
+                  (val) => (val && val.length > 0) || 'Enter the batch code',
+                ]"
               >
                 <template #prepend>
                   <q-icon name="batch_prediction" />
@@ -72,28 +69,22 @@
                 icon="assignment_turned_in"
                 label="Perishable"
               >
-                <q-tooltip
-                  class="bg-indigo"
-                  :offset="[10, 10]"
-                >
-                  If the product is a <br>
-                  <strong> perishable good or date bound</strong>, set
-                  <br> the <strong>Manufacturing Date</strong> and the <strong>Expiry Date</strong>
-                  <br> of the product
+                <q-tooltip class="bg-indigo" :offset="[10, 10]">
+                  If the product is a <br />
+                  <strong> perishable good or date bound</strong>, set <br />
+                  the <strong>Manufacturing Date</strong> and the
+                  <strong>Expiry Date</strong> <br />
+                  of the product
                 </q-tooltip>
               </q-toggle>
-              <div
-                v-show="prods.prodInfo.perish"
-                class="flex flex-wrap ml-4"
-              >
+              <div v-show="prods.prodInfo.perish" class="flex flex-wrap ml-4">
                 <!-- start the date -->
                 <div class="w-full lg:w-12/12 px-4">
                   <div class="relative w-full mb-3">
                     <div class="flex flex-wrap flex-center">
-                      <label
-                        for="expiry-date"
-                        class="mr-4 mb-4"
-                      >Perishable Date</label>
+                      <label for="expiry-date" class="mr-4 mb-4"
+                        >Perishable Date</label
+                      >
                     </div>
                     <div class="flex flex-center">
                       <q-input
@@ -103,19 +94,13 @@
                         filled
                       >
                         <template #append>
-                          <q-icon
-                            name="event"
-                            class="cursor-pointer"
-                          >
+                          <q-icon name="event" class="cursor-pointer">
                             <q-popup-proxy
                               cover
                               transition-show="scale"
                               transition-hide="scale"
                             >
-                              <q-date
-                                v-model="prods.prodInfo.perDate"
-                                range
-                              >
+                              <q-date v-model="prods.prodInfo.perDate" range>
                                 <div class="row items-center justify-end">
                                   <q-btn
                                     v-close-popup
@@ -145,7 +130,10 @@
                 accept=".jpg, .png, .svg, image/*"
                 max-file-size="6000000"
                 counter
-                :rules="[val => val !== null && val !== '' || 'Please select an image']"
+                :rules="[
+                  (val) =>
+                    (val !== null && val !== '') || 'Please select an image',
+                ]"
                 @rejected="onRejected"
               >
                 <template #prepend>
@@ -158,7 +146,7 @@
                   :src="prods.prodLogoUrl"
                   alt="Product Logo"
                   class="w-20 h-20"
-                >
+                />
               </div>
               <q-select
                 ref="qrType"
@@ -168,7 +156,11 @@
                 color="purple-12"
                 :options="prods.prodInfo.imgFmt"
                 label="QR Image format"
-                :rules="[val => val !== null && val !== '' || 'Please select a QR code type']"
+                :rules="[
+                  (val) =>
+                    (val !== null && val !== '') ||
+                    'Please select a QR code type',
+                ]"
               >
                 <template #prepend>
                   <q-icon name="tune" />
@@ -184,8 +176,11 @@
                 type="number"
                 label="Quantity"
                 hint="minimum is 200 and maximum is 100,000"
-                :rules="[val => val >= 200 && val <= 100001
-                  || 'Please enter a value between 200 and 100,000']"
+                :rules="[
+                  (val) =>
+                    (val >= 200 && val <= 100001) ||
+                    'Please enter a value between 200 and 100,000',
+                ]"
                 @change="updateTotal"
               >
                 <template #prepend>
@@ -206,17 +201,11 @@
                 </template>
 
                 <template #append>
-                  <q-icon
-                    name="attach_money"
-                    color="orange"
-                  />
+                  <q-icon name="attach_money" color="orange" />
                 </template>
 
                 <template #control>
-                  <div
-                    class="self-center full-width no-outline"
-                    tabindex="0"
-                  >
+                  <div class="self-center full-width no-outline" tabindex="0">
                     {{ prods.total }}
                   </div>
                 </template>
@@ -226,47 +215,43 @@
           <!-- Step 1 ends -->
         </q-step>
         <!-- Step 2 -->
-        <q-step
-          :name="2"
-          title="Payment Info"
-          icon="payments"
-          :done="step > 2"
-        >
+        <q-step :name="2" title="Payment Info" icon="payments" :done="step > 2">
           <div class="flex flex-wrap flex-center mb-1">
-            <h1 class="text-2xl">
-              Payment
-            </h1>
+            <h1 class="text-2xl">Payment</h1>
           </div>
           <div
             class="flex flex-end"
-            style=" width: 42px; height: 30px;
-                        margin-left: 45%;
-                        flex-direction: column-reverse;
-                        align-content: center;
-                        justify-content: center;
-                        flex-wrap: wrap;
-                        margin-bottom: 10px; "
+            style="
+              width: 42px;
+              height: 30px;
+              margin-left: 45%;
+              flex-direction: column-reverse;
+              align-content: center;
+              justify-content: center;
+              flex-wrap: wrap;
+              margin-bottom: 10px;
+            "
           >
             <img
               style="padding-right: 10px"
               src="../../assets/img/svg/visa.svg"
               alt="visa"
-            >
+            />
             <img
               style="padding-right: 10px"
               src="../../assets/img/svg/mastercard.svg"
               alt="mastercard"
-            >
+            />
             <img
               style="padding-right: 10px"
               src="../../assets/img/svg/vodafone.svg"
               alt="maestro"
-            >
+            />
             <img
               style="padding-right: 10px"
               src="../../assets/img/svg/mtn.svg"
               alt="mastercard"
-            >
+            />
           </div>
           <div class="q-gutter-md">
             <div class="m-8">
@@ -276,7 +261,7 @@
                 outlined
                 color="purple-12"
                 label="Full Name"
-                :rules="[val => val && val.length > 0 || 'Enter your full name']"
+                readonly
               >
                 <template #prepend>
                   <q-icon name="person" />
@@ -301,7 +286,9 @@
                 outlined
                 color="purple-12"
                 label="Phone Number"
-                :rules="[val => val && val.length > 5 || 'Enter your phone number']"
+                :rules="[
+                  (val) => (val && val.length > 5) || 'Enter your phone number',
+                ]"
               >
                 <template #prepend>
                   <q-icon name="phone" />
@@ -321,10 +308,7 @@
                 </template>
 
                 <template #append>
-                  <q-icon
-                    name="attach_money"
-                    color="orange"
-                  />
+                  <q-icon name="attach_money" color="orange" />
                 </template>
 
                 <template #control>
@@ -349,9 +333,7 @@
           :done="step > 3"
         >
           <div>
-            <q-form
-              class="q-gutter-md"
-            >
+            <q-form class="q-gutter-md">
               <div class="m-8">
                 <q-field
                   outlined
@@ -360,10 +342,7 @@
                   stack-label
                 >
                   <template #control>
-                    <div
-                      class="self-center full-width no-outline"
-                      tabindex="0"
-                    >
+                    <div class="self-center full-width no-outline" tabindex="0">
                       {{ prods.prodInfo.prodName }}
                     </div>
                   </template>
@@ -373,16 +352,14 @@
                   </template>
                 </q-field>
                 <q-field
+                  class="mt-6"
                   outlined
                   color="purple-12"
                   label="Batch Code *"
                   stack-label
                 >
                   <template #control>
-                    <div
-                      class="self-center full-width no-outline"
-                      tabindex="0"
-                    >
+                    <div class="self-center full-width no-outline" tabindex="0">
                       {{ prods.prodInfo.batchCode }}
                     </div>
                   </template>
@@ -407,33 +384,30 @@
                   <img
                     v-if="prods.prodLogoUrl"
                     outlined
-                    class="mt-5 mb-5 w-20 h-20 "
+                    class="mt-5 mb-5 w-20 h-20"
                     :src="prods.prodLogoUrl"
                     stack-label
                     readonly
                     color="purple-12"
                     label="Product Logo"
-                  >
+                  />
                 </div>
 
                 <q-field
                   outlined
-                  class="mt-6 "
+                  class="mt-6"
                   stack-label
                   color="purple-12"
                   label="QR Image format"
                 >
                   <template #control>
-                    <div
-                      class="self-center full-width no-outline"
-                      tabindex="0"
-                    >
+                    <div class="self-center full-width no-outline" tabindex="0">
                       {{ prods.prodInfo.qrType }}
                     </div>
                   </template>
 
                   <template #prepend>
-                    <q-icon name="'tune'" />
+                    <q-icon name="tune" />
                   </template>
                 </q-field>
 
@@ -445,10 +419,7 @@
                   stack-label
                 >
                   <template #control>
-                    <div
-                      class="self-center full-width no-outline"
-                      tabindex="0"
-                    >
+                    <div class="self-center full-width no-outline" tabindex="0">
                       {{ prods.prodInfo.quantity }}
                     </div>
                   </template>
@@ -456,44 +427,45 @@
                     <q-icon name="1k_plus" />
                   </template>
                 </q-field>
-                <hr class="rounded mt-6">
+                <hr class="rounded mt-6" />
                 <div>
                   <!-- Mobile Money -->
                   <div class="flex flex-wrap flex-center mt-5">
-                    <h1 class="text-2xl">
-                      Payment
-                    </h1>
+                    <h1 class="text-2xl">Payment</h1>
                   </div>
                   <div
                     class="flex flex-end mt-1"
-                    style=" width: 42px; height: 30px;
-                        margin-left: 45%;
-                        flex-direction: column-reverse;
-                        align-content: center;
-                        justify-content: center;
-                        flex-wrap: wrap;
-                        margin-bottom: 10px; "
+                    style="
+                      width: 42px;
+                      height: 30px;
+                      margin-left: 45%;
+                      flex-direction: column-reverse;
+                      align-content: center;
+                      justify-content: center;
+                      flex-wrap: wrap;
+                      margin-bottom: 10px;
+                    "
                   >
                     <img
                       style="padding-right: 10px"
                       src="../../assets/img/svg/visa.svg"
                       alt="visa"
-                    >
+                    />
                     <img
                       style="padding-right: 10px"
                       src="../../assets/img/svg/mastercard.svg"
                       alt="mastercard"
-                    >
+                    />
                     <img
                       style="padding-right: 10px"
                       src="../../assets/img/svg/vodafone.svg"
                       alt="maestro"
-                    >
+                    />
                     <img
                       style="padding-right: 10px"
                       src="../../assets/img/svg/mtn.svg"
                       alt="mastercard"
-                    >
+                    />
                   </div>
                   <div>
                     <div class="flex flex-wrap ml-4">
@@ -581,10 +553,7 @@
                       <q-icon name="account_balance_wallet" />
                     </template>
                     <template #append>
-                      <q-icon
-                        name="attach_money"
-                        color="orange"
-                      />
+                      <q-icon name="attach_money" color="orange" />
                     </template>
                     <template #control>
                       <div
@@ -599,29 +568,32 @@
               </div>
               <q-toggle
                 v-model="accept"
-                class="flex flex-center "
-                label="I accept the license and terms"
+                class="flex flex-center"
+                label="Initiate the payment process."
               />
             </q-form>
           </div>
           <!-- step 3 ends -->
         </q-step>
         <!-- step 4 -->
-        <q-step
-          :name="4"
-          title="Peace Out"
-          icon="settings"
-        >
+        <q-step :name="4" title="Peace Out" icon="settings">
           <div class="grid">
             <div class="flex-row text-center">
-              <h3 style="font-size:60px; text-transform: uppercase;">
+              <h3 style="font-size: 60px; text-transform: uppercase">
                 Thank You
               </h3>
             </div>
             <div class="flex-col flex-start">
-              <h5 style="font-size:20px; margin-left:10px; margin-top: 20px; margin-bottom:20px;">
-                We are grateful for doing business with us.
-                Kindly check your email for a link to download the QR codes.
+              <h5
+                style="
+                  font-size: 20px;
+                  margin-left: 10px;
+                  margin-top: 20px;
+                  margin-bottom: 20px;
+                "
+              >
+                We are grateful for doing business with us. Kindly check your
+                email for a link to download the QR codes.
               </h5>
             </div>
             <div class="flex-col text-center">
@@ -663,20 +635,16 @@
 </template>
 
 <script>
-import {
-  ref,
-  defineComponent, computed, watch,
-} from 'vue';
-import { useQuasar } from 'quasar';
-import { useProdStore } from '../../stores/prods';
+import { ref, defineComponent, computed, watch } from "vue";
+import { useQuasar } from "quasar";
+import { useProdStore } from "../../stores/prods";
 
 export default defineComponent({
-
   props: {
     color: {
-      default: 'light',
+      default: "light",
       validator(value) {
-        return ['light', 'dark'].indexOf(value) !== -1;
+        return ["light", "dark"].indexOf(value) !== -1;
       },
     },
   },
@@ -696,7 +664,7 @@ export default defineComponent({
     const perishing = ref([null]);
     const fullname = ref(null);
     const phoneNumber = ref(null);
-    const imageUrl = ref('');
+    const imageUrl = ref("");
 
     const updateTotal = () => {
       const newQuant = prods.prodInfo.quantity;
@@ -705,7 +673,7 @@ export default defineComponent({
 
     const onRejected = (rejectedEntries) => {
       this.q.notify({
-        type: 'negative',
+        type: "negative",
         message: `${rejectedEntries.length} file(s) did not pass validation constraints`,
       });
     };
@@ -716,23 +684,26 @@ export default defineComponent({
       imageUrl.value = URL.createObjectURL(prods.prodInfo.prodLogo.value);
     };
     const prodLogos = computed(() => prods.prodInfo.prodLogo);
-    watch(prodLogos, () => {
-
-    }, { deep: true });
+    watch(prodLogos, () => {}, { deep: true });
 
     const handleNavigation = async () => {
       let allInputsValid = true;
 
       // Check validation for input fields in step 1
       if (step.value === 1) {
-        allInputsValid = prodName.value && prodName.value.validate()
-       && batchCode.value && batchCode.value.validate()
-          && prodLogo.value && prodLogo.value.validate()
-          && qrType.value && qrType.value.validate()
-          && quant.value && quant.value.validate();
+        allInputsValid =
+          prodName.value &&
+          prodName.value.validate() &&
+          batchCode.value &&
+          batchCode.value.validate() &&
+          prodLogo.value &&
+          prodLogo.value.validate() &&
+          qrType.value &&
+          qrType.value.validate() &&
+          quant.value &&
+          quant.value.validate();
       } else if (step.value === 2) {
-        allInputsValid = fullname.value && fullname.value.validate()
-          && phoneNumber.value && phoneNumber.value.validate();
+        allInputsValid = phoneNumber.value && phoneNumber.value.validate();
       }
 
       // Proceed to next step if all validations passed
@@ -740,8 +711,8 @@ export default defineComponent({
         // Check if we are on step 3 and accept is false, disable navigation
         if (step.value === 3 && !accept.value) {
           q.notify({
-            type: 'negative',
-            message: 'You have not accepted the process.',
+            type: "negative",
+            message: "You have not accepted the process.",
           });
           return;
         }
@@ -750,14 +721,24 @@ export default defineComponent({
             await prods.handlePayment();
           } catch (error) {
             // Handle payment error
-            console.error('Payment request failed:', error);
-            q.notify({ type: 'negative', message: 'Payment failed. Please try again.' });
+            console.error("Payment request failed:", error);
+            q.notify({
+              type: "negative",
+              message: "Payment failed. Please try again.",
+            });
             return; // Prevent stepper navigation on failure
           }
         }
         // Check if we are on step 4, navigate to step 1 if "Finish" is clicked
         if (step.value === 4) {
-          stepperRef.value.goToPage(0); // Go back to step 1
+          prods.prodInfo.prodName = "";
+          prods.prodInfo.batchCode = "";
+          prods.prodInfo.prodLogo = "";
+          prods.prodInfo.qrType = "";
+          prods.prodInfo.quantity = "";
+          prods.payInfo.phoneNumber = "";
+          prods.total = 0;
+          stepperRef.value.goTo(1); // Go back to step 1
           // Reset any other necessary variables or states
           return;
         }
@@ -766,7 +747,7 @@ export default defineComponent({
         stepperRef.value.next();
       } else {
         // Handle validation errors (optional)
-        console.error('One or more input fields failed validation.');
+        console.error("One or more input fields failed validation.");
       }
     };
 
@@ -794,7 +775,6 @@ export default defineComponent({
       stepperRef,
     };
   },
-
 });
 </script>
 <style scoped>

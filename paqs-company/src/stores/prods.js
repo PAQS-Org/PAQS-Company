@@ -28,9 +28,12 @@ export const useProdStore = defineStore({
       quantity: "",
     },
     payInfo: {
-      fullname: "AlincoBay",
-      email: "blackmore@gmail.com",
-      phoneNumber: "225552252",
+      fullname:
+        localStorage.getItem("first_name") +
+        " " +
+        localStorage.getItem("last_name"),
+      email: localStorage.getItem("email"),
+      phoneNumber: "",
     },
     total: 0,
   }),
@@ -38,25 +41,32 @@ export const useProdStore = defineStore({
   getters: {
     totals() {
       const quantity = parseInt(this.$state.prodInfo.quantity, 10);
-      return Math.max(
-        0,
-        quantity *
-          (quantity <= 200
-            ? 0
-            : quantity <= 500
-            ? 0.1
-            : quantity <= 1000
-            ? 0.08
-            : quantity <= 5000
-            ? 0.06
-            : quantity <= 10000
-            ? 0.04
-            : quantity <= 50000
-            ? 0.02
-            : quantity >= 100000
-            ? 0.01
-            : 0)
-      );
+
+      // Define the unit price based on the quantity
+      let unitPrice = 0;
+      if (quantity > 100000 || quantity < 200) {
+        return "out of bounds";
+      } else if (quantity <= 100000) {
+        unitPrice = 0.01;
+      } else if (quantity >= 50000) {
+        unitPrice = 0.02;
+      } else if (quantity >= 10000) {
+        unitPrice = 0.04;
+      } else if (quantity >= 5000) {
+        unitPrice = 0.06;
+      } else if (quantity >= 1000) {
+        unitPrice = 0.08;
+      } else if (quantity >= 500) {
+        unitPrice = 0.1;
+      } else if (quantity >= 200) {
+        unitPrice = 0.15;
+      } else if (quantity <= 200) {
+        unitPrice = 0.2;
+      }
+
+      // Calculate the total
+      const total = quantity * unitPrice;
+      return total;
     },
     prodLogoUrl() {
       if (this.prodInfo.prodLogo) {

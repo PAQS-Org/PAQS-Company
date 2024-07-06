@@ -32,6 +32,8 @@
     <div class="flex flex-wrap">
       <div class="w-full xl:w-6/12 mb-12 xl:mb-0 px-4">
         <DetailCard
+          header-title="Checkout"
+          header-title2="Scanned"
           :first-title="'Checkout Today'"
           :first-title-val="checkoutToday"
           :first-title-val1="checkoutPrevDay"
@@ -63,6 +65,7 @@
       </div>
       <div class="w-full xl:w-6/12 mb-12 xl:mb-0 px-4">
         <DetailCard
+          header-title2="Location"
           :first-title="'Conversion rate'"
           :first-title-val="`${conversionRate} %`"
           first-icon-plus="../../../src/assets/img/svg/cons.svg"

@@ -183,7 +183,7 @@
               <q-toggle
                 v-model="accept"
                 class="flex flex-center"
-                label="I accept the license and terms"
+                label="I accept the effect of the changes."
               />
             </q-form>
           </div>
@@ -312,20 +312,24 @@ export default defineComponent({
         }
         if (step.value === 2 && accept.value) {
           try {
-            await prods.updateCodes();
+            await prods.updatecodes();
           } catch (error) {
             // Handle payment error
-            console.error("Payment request failed:", error);
+            console.error("Process request failed:", error);
             q.notify({
               type: "negative",
-              message: "Payment failed. Please try again.",
+              message: "Process failed. Please try again.",
             });
             return; // Prevent stepper navigation on failure
           }
         }
         // Check if we are on step 4, navigate to step 1 if "Finish" is clicked
         if (step.value === 3) {
-          stepperRef.value.goToPage(0); // Go back to step 1
+          prods.prodInfo.prodName = "";
+          prods.prodInfo.batchCode = "";
+          prods.prodInfo.upReason = "";
+          prods.prodInfo.message = "";
+          stepperRef.value.goTo(1); // Go back to step 1
           // Reset any other necessary variables or states
           return;
         }

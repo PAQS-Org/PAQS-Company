@@ -2,6 +2,9 @@
   <div>
     <div>
       <q-card class="my-cardvvv" flat bordered>
+        <p class="text-xl font-semibold text-center">
+          <span>{{ headerTitle }}</span>
+        </p>
         <q-list>
           <q-item clickable>
             <q-item-section avatar>
@@ -164,7 +167,13 @@
               </div>
             </q-item-section>
           </q-item>
+          <!-- major division + -->
           <q-separator />
+          <!-- major division - -->
+
+          <p class="text-xl font-semibold text-center">
+            <span>{{ headerTitle2 }}</span>
+          </p>
           <q-item clickable>
             <q-item-section avatar>
               <i :style="[fourthIconColor]" :class="[fourthIcon]" />
@@ -258,6 +267,14 @@
 </template>
 <script setup>
 const props = defineProps({
+  headerTitle: {
+    type: String,
+    default: null,
+  },
+  headerTitle2: {
+    type: String,
+    default: null,
+  },
   firstTitle: {
     type: [String],
     default: null,
