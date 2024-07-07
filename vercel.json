@@ -3,15 +3,8 @@
   "public": true,
   "builds": [
     {
-      "src": "dist/pwa/**/*",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "quasar.conf.js",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/pwa"
-      }
+      "src": "package.json",
+      "use": "vercel-quasar"
     }
   ],
   "routes": [
