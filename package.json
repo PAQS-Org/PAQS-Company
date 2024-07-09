@@ -11,8 +11,7 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "build": "quasar build -m pwa",
-    "deploy": "node ./node_modules/vue-gh-pages/index.js --branch gh-pages -m \"Deploy to gh-pages.\"",
-    "gh-pages-deploy": "node scripts/gh-pages-deploy.js"
+    "deploy": "gh-pages -d dist/pwa"
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
@@ -44,6 +43,7 @@
     "eslint": "9.x",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^9.27.0",
+    "gh-pages": "^6.1.1",
     "globals": "^15.8.0",
     "postcss": "^8.4.14",
     "prettier": "^2.5.1",
