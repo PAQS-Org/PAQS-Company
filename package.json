@@ -11,7 +11,8 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "build": "quasar build -m pwa",
-    "deploy": "vercel"
+    "deploy": "node ./node_modules/vue-gh-pages/index.js --branch gh-pages -m \"Deploy to gh-pages.\"",
+    "gh-pages-deploy": "node scripts/gh-pages-deploy.js"
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
