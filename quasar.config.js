@@ -53,7 +53,6 @@ module.exports = configure(function (/* ctx */) {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      publicPath: "https://github.com/PAQS-Org/PAQS-Company",
       // publicPath: '/',
       // analyze: true,
       // env: {},
