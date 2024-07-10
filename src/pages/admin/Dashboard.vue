@@ -24,6 +24,8 @@
   </div>
 </template>
 <script setup>
+import { useMeta } from "quasar";
+import { ref } from "vue";
 import CardLineChart from "../../components/Cards/CardLineChart.vue";
 import CardTableChart from "../../components/Cards/CardTableChart.vue";
 import CardBarChart from "../../components/Cards/CardBarChart.vue";
@@ -32,5 +34,11 @@ import CardSocialTraffic from "../../components/Cards/CardSocialTraffic.vue";
 
 defineOptions({
   name: "DashboardPage",
+});
+const title = ref("Dashboard");
+useMeta(() => {
+  return {
+    title: title.value,
+  };
 });
 </script>

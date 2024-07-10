@@ -8,12 +8,11 @@
     </div> -->
   </div>
 </template>
-<script>
-import CardTable from '../../components/Cards/GenerateCodes.vue';
+<script setup>
+import { useMeta } from "quasar";
+import { ref } from "vue";
+import CardTable from "../../components/Cards/GenerateCodes.vue";
 
-export default {
-  components: {
-    CardTable,
-  },
-};
+const title = ref("Generate QR Code");
+useMeta(title.value);
 </script>

@@ -60,7 +60,7 @@ module.exports = configure(function (/* ctx */) {
       // ignorePublicFolder: true,
       // minify: false,
       // polyfillModulePreload: true,
-      distDir: "dist/pwa",
+      // distDir: "dist/pwa",
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
@@ -84,7 +84,8 @@ module.exports = configure(function (/* ctx */) {
           "vite-plugin-checker",
           {
             eslint: {
-              lintCommand: 'eslint "./**/*.{js,mjs,cjs,vue}"',
+              // lintCommand: '.eslintrc "./**/*.{js,mjs,cjs,vue}"',
+              lintCommand: ".eslintrc.mjs",
             },
           },
           { server: false },

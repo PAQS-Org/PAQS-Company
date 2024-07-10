@@ -9,9 +9,9 @@ defineOptions({
 });
 const metaData = {
   // sets document title
-  title: "Product Authentication Quick Scan",
+  title: "Home",
   // optional; sets final title as "Index Page - My Website", useful for multiple level meta
-  titleTemplate: (title) => `Home | ${title} `,
+  titleTemplate: (title) => `Product Authentication Quick Scan  | ${title} `,
 
   // meta tags
   meta: {
