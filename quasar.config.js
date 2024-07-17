@@ -11,6 +11,7 @@
 const { configure } = require("quasar/wrappers");
 const path = require("path");
 const viteImagemin = require("vite-plugin-imagemin");
+const PurgeCSS = require("@fullhuman/postcss-purgecss");
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -129,6 +130,25 @@ module.exports = configure(function (/* ctx */) {
             },
           }),
         ],
+        [
+          PurgeCSS({
+            content: [
+              path.resolve(__dirname, "./src/**/*.html"),
+              path.resolve(__dirname, "./src/**/*.vue"),
+              path.resolve(__dirname, "./src/**/*.jsx"),
+              path.resolve(__dirname, "./src/**/*.tsx"),
+            ],
+            css: [path.resolve(__dirname, "./src/**/*.css")],
+            defaultExtractor: (content) =>
+              content.match(/[\w-/:]+(?<!:)/g) || [],
+            safelist: [
+              /-(leave|enter|appear)(|-(to|from|active))$/,
+              /^(?!(|.*?:)cursor-move).+-move$/,
+              /^router-link(|-exact)-active$/,
+              /data-v-.*/,
+            ],
+          }),
+        ],
       ],
     },
 
@@ -211,7 +231,7 @@ module.exports = configure(function (/* ctx */) {
         skipWaiting: true,
         clientsClaim: true,
       },
-      // useFilenameHashes: true,
+      useFilenameHashes: true,
       // extendGenerateSWOptions (cfg) {}
       // extendInjectManifestOptions (cfg) {},
       // extendManifestJson (json) {}

@@ -39,6 +39,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.6.0",
+    "@fullhuman/postcss-purgecss": "^6.0.0",
+    "@fullhuman/vue-cli-plugin-purgecss": "^6.0.0",
     "@intlify/vite-plugin-vue-i18n": "^3.3.1",
     "@quasar/app-vite": "^1.8.0",
     "autoprefixer": "^10.4.2",
