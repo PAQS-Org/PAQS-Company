@@ -10,6 +10,7 @@
 
 const { configure } = require("quasar/wrappers");
 const path = require("path");
+const viteImagemin = require("vite-plugin-imagemin");
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -46,21 +47,21 @@ module.exports = configure(function (/* ctx */) {
         node: "node20",
       },
 
-      vueRouterMode: "hash", // available values: 'hash', 'history'
+      vueRouterMode: "history", // available values: 'history', 'hash'
       // vueRouterBase,
       // vueDevtools,
       // vueOptionsAPI: false,
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      // publicPath: '/',
+      publicPath: "/",
       // analyze: true,
       // env: {},
       // rawDefine: {}
       // ignorePublicFolder: true,
-      // minify: false,
+      minify: true,
       // polyfillModulePreload: true,
-      // distDir: "dist/pwa",
+      distDir: "dist/pwa",
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
@@ -89,6 +90,44 @@ module.exports = configure(function (/* ctx */) {
             },
           },
           { server: false },
+        ],
+        [
+          viteImagemin({
+            gifsicle: {
+              optimizationLevel: 7,
+              interlaced: false,
+            },
+            optipng: {
+              optimizationLevel: 7,
+            },
+            mozjpeg: {
+              quality: 20,
+            },
+            pngquant: {
+              quality: [0.65, 0.8],
+              speed: 4,
+            },
+            svgo: {
+              plugins: [
+                {
+                  name: "removeViewBox",
+                  active: false,
+                },
+                {
+                  name: "removeEmptyAttrs",
+                  active: false,
+                },
+                {
+                  name: "cleanupIDs",
+                  active: false,
+                },
+                {
+                  name: "collapseGroups",
+                  active: false,
+                },
+              ],
+            },
+          }),
         ],
       ],
     },
@@ -129,16 +168,16 @@ module.exports = configure(function (/* ctx */) {
     animations: [],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#property-sourcefiles
-    // sourceFiles: {
-    //   rootComponent: 'src/App.vue',
-    //   router: 'src/router/index',
-    //   store: 'src/store/index',
-    //   registerServiceWorker: 'src-pwa/register-service-worker',
-    //   serviceWorker: 'src-pwa/custom-service-worker',
-    //   pwaManifestFile: 'src-pwa/manifest.json',
-    //   electronMain: 'src-electron/electron-main',
-    //   electronPreload: 'src-electron/electron-preload'
-    // },
+    sourceFiles: {
+      // rootComponent: 'src/App.vue',
+      // router: 'src/router/index',
+      // store: 'src/store/index',
+      registerServiceWorker: "src-pwa/register-service-worker",
+      serviceWorker: "src-pwa/custom-service-worker",
+      pwaManifestFile: "src-pwa/manifest.json",
+      // electronMain: 'src-electron/electron-main',
+      // electronPreload: 'src-electron/electron-preload'
+    },
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-ssr/configuring-ssr
     ssr: {

@@ -9,9 +9,15 @@
   </div>
 </template>
 <script setup>
-import { defineAsyncComponent } from "vue";
-
+import { ref, defineAsyncComponent } from "vue";
+import { useMeta } from "quasar";
 const CardTable = defineAsyncComponent(() =>
   import("../../components/Cards/CardUpdate.vue")
 );
+const title = ref("Update");
+useMeta(() => {
+  return {
+    title: title.value,
+  };
+});
 </script>

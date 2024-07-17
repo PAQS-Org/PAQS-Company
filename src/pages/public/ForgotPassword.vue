@@ -1,5 +1,5 @@
 <template>
-  <Form ref="form" @submit="onSubmit">
+  <Form ref="form" @submit="resetPassword">
     <Input
       v-model="user.email"
       label="Email"

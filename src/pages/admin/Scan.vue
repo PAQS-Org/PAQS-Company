@@ -15,7 +15,7 @@
 
 <script setup>
 import { ref, nextTick, defineAsyncComponent } from "vue";
-
+import { useMeta } from "quasar";
 const dialogComp = defineAsyncComponent(() =>
   import("../../components/Cards/CardResult.vue")
 );
@@ -36,6 +36,13 @@ const onQrCodeScanned = async (result) => {
   await nextTick();
   isDialogOpen.value = true;
 };
+
+const title = ref("Scan Code");
+useMeta(() => {
+  return {
+    title: title.value,
+  };
+});
 </script>
 
 <style lang="scss" scoped></style>

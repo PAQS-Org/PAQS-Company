@@ -180,8 +180,11 @@ import { reactive, ref } from "vue";
 import { useAuthStore } from "src/stores/auth.js";
 import useVuelidate from "@vuelidate/core";
 import { required, email } from "@vuelidate/validators";
+import { useQuasar } from "quasar";
 
-const { isLoading, register } = useAuthStore();
+const $q = useQuasar();
+
+const { register } = useAuthStore();
 
 defineOptions({
   name: "registerComp",

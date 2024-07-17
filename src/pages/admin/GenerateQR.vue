@@ -14,5 +14,9 @@ import { ref } from "vue";
 import CardTable from "../../components/Cards/GenerateCodes.vue";
 
 const title = ref("Generate QR Code");
-useMeta(title.value);
+useMeta(() => {
+  return {
+    title: title.value,
+  };
+});
 </script>

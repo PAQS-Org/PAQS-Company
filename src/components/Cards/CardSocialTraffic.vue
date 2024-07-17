@@ -51,10 +51,13 @@
 <script setup>
 import { computed, ref, onBeforeUnmount, onMounted } from "vue";
 import { useTransactionStore } from "../../stores/dataFeed";
+import { useQuasar } from "quasar";
 
 defineOptions({
   name: "socialTraffic",
 });
+
+const $q = useQuasar();
 
 const traffic = useTransactionStore();
 

@@ -1214,12 +1214,12 @@ select {
 }
 
 .bg-image {
-  background-image: url("../assets/img/svg/Artboard3.svg");
+  background-image: url("../assets/img/svg/Artboard3.webp");
   background-repeat: no-repeat;
   background-size: cover;
 }
 .bg-image-2 {
-  background-image: url("../assets/img/svg/Artboard4.svg");
+  background-image: url("../assets/img/svg/Artboard4.webp");
   background-repeat: no-repeat;
   background-size: cover;
 }

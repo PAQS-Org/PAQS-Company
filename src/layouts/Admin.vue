@@ -66,7 +66,7 @@
               <q-item-section avatar>
                 <q-icon name="receipt_long" />
               </q-item-section>
-              <q-item-section> Invoice </q-item-section>
+              <q-item-section> Receipt </q-item-section>
             </q-item>
 
             <q-item v-ripple clickable to="/dash/scan">
@@ -88,7 +88,7 @@
         </q-scroll-area>
         <q-img
           class="absolute-top"
-          src="../assets/img/svg/Artboard3.svg"
+          src="../assets/img/svg/Artboard3.webp"
           style="height: 150px"
         >
           <div class="absolute-bottom bg-transparent">
@@ -115,12 +115,9 @@
           >
             <b>Install PAQS-Company? </b>
             <template v-slot:avatar>
-              <q-avatar
-                color="grey-9"
-                text-color="white"
-                icon="join_left"
-                font-size="22px"
-              ></q-avatar>
+              <q-avatar color="grey-9" text-color="white" font-size="22px">
+                <img src="../assets/logo.png" />
+              </q-avatar>
             </template>
             <template v-slot:action>
               <q-btn
@@ -197,7 +194,6 @@ onMounted(() => {
     });
   }
 });
-console.log("hi", showInsatllbanner);
 
 const installApp = () => {
   // Hide the app provided install promotion

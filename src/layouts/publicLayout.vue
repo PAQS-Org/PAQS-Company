@@ -25,7 +25,7 @@
 
 <style scoped>
 .bg-image {
-  background-image: url("../assets/img/svg/Artboard3.svg");
+  background-image: url("../assets/img/svg/Artboard3.webp");
   background-repeat: no-repeat;
   background-size: cover;
 }

@@ -26,7 +26,6 @@ export const useTransactionStore = defineStore("transaction", {
   getters: {
     getCompanyStatistics(state) {
       if (!state.lineChartData.length) {
-        console.log("greeee");
         return {
           totalCompleted: 0,
           bestMonth: { monthYear: "", count: 0 },

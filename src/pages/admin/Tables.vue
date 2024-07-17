@@ -24,9 +24,9 @@
 </template>
 
 <script setup>
-import { defineAsyncComponent, computed, onMounted } from "vue";
+import { ref, defineAsyncComponent, computed, onMounted } from "vue";
 import { useTransactionStore } from "../../stores/dataFeed";
-
+import { useMeta } from "quasar";
 defineOptions({
   name: "transactionTable",
 });
@@ -152,7 +152,13 @@ const handlePageChange = (page) => {
 };
 
 onMounted(async () => {
-  console.log("his");
   await transactionStore.fetchTransactions();
+});
+
+const title = ref("Receipt");
+useMeta(() => {
+  return {
+    title: title.value,
+  };
 });
 </script>
