@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable linebreak-style */
 import { defineStore } from "pinia";
 import getData from "src/api/getData.js";
+import { Notify } from "quasar";
 
 export const useTransactionStore = defineStore("transaction", {
   state: () => ({
@@ -26,17 +28,18 @@ export const useTransactionStore = defineStore("transaction", {
   getters: {
     getCompanyStatistics(state) {
       if (!state.lineChartData.length) {
+        console.log("greeee");
         return {
           totalCompleted: 0,
           bestMonth: { monthYear: "", count: 0 },
-          ema: [],
+          bestYear: { year: "", percentage: 0 },
         };
       }
+
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      let completedCounts = {};
-      let totalCompleted = 0;
-      let completedYearCounts = {};
-      let totalScans = {};
+      const memoizedFormattedDates = {};
+      const memoizedCompletedCounts = {};
+      const memoizedTotalScans = {};
 
       const monthNames = [
         "Jan",
@@ -53,33 +56,45 @@ export const useTransactionStore = defineStore("transaction", {
         "Dec",
       ];
 
+      // Process data once to populate completed counts and total scans
       state.lineChartData.forEach((item) => {
         const date = new Date(item.timestamp);
         const year = date.getFullYear();
+        const formattedMonthYear = formatDate(item.timestamp, {
+          timeZone: userTimezone,
+          month: "numeric",
+          year: "numeric",
+        });
 
-        if (!completedYearCounts[year]) {
-          completedYearCounts[year] = 0;
-          totalScans[year] = 0;
+        if (!memoizedCompletedCounts[year]) {
+          memoizedCompletedCounts[year] = 0;
+          memoizedTotalScans[year] = 0;
         }
 
         if (item.scanned === "completed") {
-          completedYearCounts[year]++;
+          memoizedCompletedCounts[year]++;
         }
 
-        totalScans[year]++;
+        memoizedTotalScans[year]++;
       });
+
+      // Calculate totalCompleted and completedCounts for months
+      let totalCompleted = 0;
+      let completedCounts = {};
 
       state.lineChartData.forEach((item) => {
         if (item.scanned === "completed") {
           const date = new Date(item.timestamp);
-          const formattedDate = new Intl.DateTimeFormat("en-US", {
+          const formattedDate = formatDate(item.timestamp, {
             timeZone: userTimezone,
             month: "numeric",
             year: "numeric",
-          }).format(date);
+          });
 
           const [formattedMonth, formattedYear] = formattedDate.split("/");
-          const monthYear = `${monthNames[formattedMonth]}-${formattedYear}`;
+          const monthYear = `${
+            monthNames[formattedMonth - 1]
+          }-${formattedYear}`;
 
           if (!completedCounts[monthYear]) {
             completedCounts[monthYear] = 0;
@@ -89,20 +104,24 @@ export const useTransactionStore = defineStore("transaction", {
         }
       });
 
-      let yearlyPerformance = Object.keys(completedYearCounts).map((year) => {
-        return {
-          year: year,
-          percentage: (
-            (completedYearCounts[year] / totalScans[year]) *
-            100
-          ).toFixed(2),
-        };
-      });
+      let yearlyPerformance = Object.keys(memoizedCompletedCounts).map(
+        (year) => {
+          return {
+            year,
+            percentage: (
+              (memoizedCompletedCounts[year] / memoizedTotalScans[year]) *
+              100
+            ).toFixed(2),
+          };
+        }
+      );
 
       // Get the best performing year
       let bestYear = yearlyPerformance.reduce(
         (best, current) =>
-          current.percentage > best.percentage ? current : best,
+          parseFloat(current.percentage) > parseFloat(best.percentage)
+            ? current
+            : best,
         { year: "", percentage: 0 }
       );
 
@@ -122,10 +141,7 @@ export const useTransactionStore = defineStore("transaction", {
       // Get the best performing month
       let bestMonth = completedCountsArray.reduce(
         (best, current) => (current.count > best.count ? current : best),
-        {
-          monthYear: "",
-          count: 0,
-        }
+        { monthYear: "", count: 0 }
       );
 
       return {
@@ -133,6 +149,18 @@ export const useTransactionStore = defineStore("transaction", {
         bestMonth,
         bestYear,
       };
+
+      function formatDate(timestamp, options) {
+        const key = `${timestamp}_${JSON.stringify(options)}`;
+        if (!memoizedFormattedDates[key]) {
+          const date = new Date(timestamp);
+          memoizedFormattedDates[key] = new Intl.DateTimeFormat(
+            "en-US",
+            options
+          ).format(date);
+        }
+        return memoizedFormattedDates[key];
+      }
     },
 
     totalScanCompleteForMonthAndYTD(state) {
@@ -140,40 +168,63 @@ export const useTransactionStore = defineStore("transaction", {
       const currentYear = state.lineChartrange.year;
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      // Filter data for the current month
-      const completedDataForMonth = state.lineChartData.filter((item) => {
+      const memoizedFormattedDates = {};
+      const memoizedMonthlyCompletions = {};
+      const memoizedYearlyCompletions = {};
+
+      function formatDate(timestamp, options) {
+        const key = `${timestamp}_${JSON.stringify(options)}`;
+        if (!memoizedFormattedDates[key]) {
+          const date = new Date(timestamp);
+          memoizedFormattedDates[key] = new Intl.DateTimeFormat(
+            "en-US",
+            options
+          ).format(date);
+        }
+        return memoizedFormattedDates[key];
+      }
+
+      // Initialize counts for the current month and year
+      let totalForMonth = 0;
+      let totalForYTD = 0;
+
+      // Process each item once to populate monthly and yearly completions
+      state.lineChartData.forEach((item) => {
         const date = new Date(item.timestamp);
-        const formattedDate = new Intl.DateTimeFormat("en-US", {
+        const monthYear = formatDate(item.timestamp, {
           timeZone: userTimezone,
           month: "numeric",
           year: "numeric",
-        }).format(date);
-
-        const [formattedMonth, formattedYear] = formattedDate.split("/");
-        return (
-          parseInt(formattedMonth) - 1 === currentMonth &&
-          parseInt(formattedYear) === currentYear &&
-          item.scanned === "completed"
-        );
-      });
-
-      const totalForMonth = completedDataForMonth.length;
-
-      // Filter data for the year-to-date (YTD)
-      const completedDataForYTD = state.lineChartData.filter((item) => {
-        const date = new Date(item.timestamp);
-        const formattedYear = new Intl.DateTimeFormat("en-US", {
+        });
+        const year = formatDate(item.timestamp, {
           timeZone: userTimezone,
           year: "numeric",
-        }).format(date);
+        });
 
-        return (
-          parseInt(formattedYear) === currentYear &&
-          item.scanned === "completed"
-        );
+        const [formattedMonth, formattedYear] = monthYear.split("/");
+        const month = parseInt(formattedMonth) - 1;
+        const itemYear = parseInt(formattedYear);
+
+        if (item.scanned === "completed") {
+          if (!memoizedMonthlyCompletions[itemYear]) {
+            memoizedMonthlyCompletions[itemYear] = {};
+          }
+          if (!memoizedMonthlyCompletions[itemYear][month]) {
+            memoizedMonthlyCompletions[itemYear][month] = 0;
+          }
+
+          if (!memoizedYearlyCompletions[itemYear]) {
+            memoizedYearlyCompletions[itemYear] = 0;
+          }
+
+          memoizedMonthlyCompletions[itemYear][month]++;
+          memoizedYearlyCompletions[itemYear]++;
+        }
       });
 
-      const totalForYTD = completedDataForYTD.length;
+      totalForMonth =
+        memoizedMonthlyCompletions[currentYear]?.[currentMonth] || 0;
+      totalForYTD = memoizedYearlyCompletions[currentYear] || 0;
       const monthsElapsed = currentMonth + 1; // January is 0, so add 1 to get the count of months elapsed
       const averageForYTD = (totalForYTD / monthsElapsed).toFixed(2);
 
@@ -182,44 +233,68 @@ export const useTransactionStore = defineStore("transaction", {
         averageForYTD,
       };
     },
+
     totalScanForMonthAndYTD(state) {
       const currentMonth = state.lineChartrange.month; // 0-based index for the current month
       const currentYear = state.lineChartrange.year;
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      // Filter data for the current month
-      const scannedDataForMonth = state.lineChartData.filter((item) => {
+      const memoizedFormattedDates = {};
+      const memoizedMonthlyScans = {};
+      const memoizedYearlyScans = {};
+
+      function formatDate(timestamp, options) {
+        const key = `${timestamp}_${JSON.stringify(options)}`;
+        if (!memoizedFormattedDates[key]) {
+          const date = new Date(timestamp);
+          memoizedFormattedDates[key] = new Intl.DateTimeFormat(
+            "en-US",
+            options
+          ).format(date);
+        }
+        return memoizedFormattedDates[key];
+      }
+
+      // Initialize counts for the current month and year
+      let totalForMonth = 0;
+      let totalForYTD = 0;
+
+      // Process each item once to populate monthly and yearly scans
+      state.lineChartData.forEach((item) => {
         const date = new Date(item.timestamp);
-        const formattedDate = new Intl.DateTimeFormat("en-US", {
+        const monthYear = formatDate(item.timestamp, {
           timeZone: userTimezone,
           month: "numeric",
           year: "numeric",
-        }).format(date);
-
-        const [formattedMonth, formattedYear] = formattedDate.split("/");
-        return (
-          parseInt(formattedMonth) - 1 === currentMonth &&
-          parseInt(formattedYear) === currentYear &&
-          item.scanned === "scanned"
-        );
-      });
-
-      const totalForMonth = scannedDataForMonth.length;
-
-      // Filter data for the year-to-date (YTD)
-      const scannedDataForYTD = state.lineChartData.filter((item) => {
-        const date = new Date(item.timestamp);
-        const formattedYear = new Intl.DateTimeFormat("en-US", {
+        });
+        const year = formatDate(item.timestamp, {
           timeZone: userTimezone,
           year: "numeric",
-        }).format(date);
+        });
 
-        return (
-          parseInt(formattedYear) === currentYear && item.scanned === "scanned"
-        );
+        const [formattedMonth, formattedYear] = monthYear.split("/");
+        const month = parseInt(formattedMonth) - 1;
+        const itemYear = parseInt(formattedYear);
+
+        if (item.scanned === "scanned") {
+          if (!memoizedMonthlyScans[itemYear]) {
+            memoizedMonthlyScans[itemYear] = {};
+          }
+          if (!memoizedMonthlyScans[itemYear][month]) {
+            memoizedMonthlyScans[itemYear][month] = 0;
+          }
+
+          if (!memoizedYearlyScans[itemYear]) {
+            memoizedYearlyScans[itemYear] = 0;
+          }
+
+          memoizedMonthlyScans[itemYear][month]++;
+          memoizedYearlyScans[itemYear]++;
+        }
       });
 
-      const totalForYTD = scannedDataForYTD.length;
+      totalForMonth = memoizedMonthlyScans[currentYear]?.[currentMonth] || 0;
+      totalForYTD = memoizedYearlyScans[currentYear] || 0;
       const monthsElapsed = currentMonth + 1; // January is 0, so add 1 to get the count of months elapsed
       const averageForYTD = (totalForYTD / monthsElapsed).toFixed(2);
 
@@ -231,11 +306,36 @@ export const useTransactionStore = defineStore("transaction", {
 
     topLocation(state) {
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const memoizedDateFormats = {};
+      const memoizedLocationData = {};
+      const memoizedProducts = {};
+
+      function formatDate(timestamp, options) {
+        const key = `${timestamp}_${JSON.stringify(options)}`;
+        if (!memoizedDateFormats[key]) {
+          const date = new Date(timestamp);
+          memoizedDateFormats[key] = new Intl.DateTimeFormat(
+            "en-US",
+            options
+          ).format(date);
+        }
+        return memoizedDateFormats[key];
+      }
+
+      function initializeCountIfNeeded(acc, location, period, periodKey) {
+        if (!acc[location][period][periodKey]) {
+          acc[location][period][periodKey] = { completed: 0, scanned: 0 };
+        }
+      }
+
+      function getLocationKey(item) {
+        return `${item.region}, ${item.city}, ${item.town}`;
+      }
 
       const locationData = state.lineChartData.reduce((acc, item) => {
-        const location = `${item.region}, ${item.city}, ${item.town}`;
-        if (!acc[location]) {
-          acc[location] = {
+        const location = getLocationKey(item);
+        if (!memoizedLocationData[location]) {
+          memoizedLocationData[location] = {
             completed: 0,
             scanned: 0,
             dates: [],
@@ -247,53 +347,69 @@ export const useTransactionStore = defineStore("transaction", {
         }
 
         const date = new Date(item.timestamp);
-        const day = new Intl.DateTimeFormat("en-US", {
+        const day = formatDate(item.timestamp, {
           timeZone: userTimezone,
           year: "numeric",
           month: "numeric",
           day: "numeric",
-        }).format(date);
-
-        const [dayYear, dayMonth, dayDay] = day.split("/");
-
+        });
+        const [dayYear, dayMonth] = day.split("/").slice(0, 2);
         const month = `${dayYear}-${dayMonth}`;
         const year = dayYear;
 
-        if (!acc[location].products[item.productName]) {
-          acc[location].products[item.productName] = {
+        if (!memoizedProducts[location]) {
+          memoizedProducts[location] = {};
+        }
+
+        if (!memoizedProducts[location][item.productName]) {
+          memoizedProducts[location][item.productName] = {
             completed: 0,
             scanned: 0,
           };
         }
 
         if (item.scanned === "completed") {
-          acc[location].completed++;
-          acc[location].products[item.productName].completed++;
-          if (!acc[location].daily[day])
-            acc[location].daily[day] = { completed: 0, scanned: 0 };
-          if (!acc[location].monthly[month])
-            acc[location].monthly[month] = { completed: 0, scanned: 0 };
-          if (!acc[location].yearly[year])
-            acc[location].yearly[year] = { completed: 0, scanned: 0 };
-          acc[location].daily[day].completed++;
-          acc[location].monthly[month].completed++;
-          acc[location].yearly[year].completed++;
+          memoizedLocationData[location].completed++;
+          memoizedProducts[location][item.productName].completed++;
+          initializeCountIfNeeded(memoizedLocationData, location, "daily", day);
+          initializeCountIfNeeded(
+            memoizedLocationData,
+            location,
+            "monthly",
+            month
+          );
+          initializeCountIfNeeded(
+            memoizedLocationData,
+            location,
+            "yearly",
+            year
+          );
+          memoizedLocationData[location].daily[day].completed++;
+          memoizedLocationData[location].monthly[month].completed++;
+          memoizedLocationData[location].yearly[year].completed++;
         }
         if (item.scanned === "scanned") {
-          acc[location].scanned++;
-          acc[location].products[item.productName].scanned++;
-          if (!acc[location].daily[day])
-            acc[location].daily[day] = { completed: 0, scanned: 0 };
-          if (!acc[location].monthly[month])
-            acc[location].monthly[month] = { completed: 0, scanned: 0 };
-          if (!acc[location].yearly[year])
-            acc[location].yearly[year] = { completed: 0, scanned: 0 };
-          acc[location].daily[day].scanned++;
-          acc[location].monthly[month].scanned++;
-          acc[location].yearly[year].scanned++;
+          memoizedLocationData[location].scanned++;
+          memoizedProducts[location][item.productName].scanned++;
+          initializeCountIfNeeded(memoizedLocationData, location, "daily", day);
+          initializeCountIfNeeded(
+            memoizedLocationData,
+            location,
+            "monthly",
+            month
+          );
+          initializeCountIfNeeded(
+            memoizedLocationData,
+            location,
+            "yearly",
+            year
+          );
+          memoizedLocationData[location].daily[day].scanned++;
+          memoizedLocationData[location].monthly[month].scanned++;
+          memoizedLocationData[location].yearly[year].scanned++;
         }
-        acc[location].dates.push(date);
-        return acc;
+        memoizedLocationData[location].dates.push(date);
+        return memoizedLocationData;
       }, {});
 
       const topLocation = Object.keys(locationData).reduce(
@@ -366,6 +482,7 @@ export const useTransactionStore = defineStore("transaction", {
         reigningProduct,
       };
     },
+
     leastAndMedianLocations(state) {
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -525,7 +642,8 @@ export const useTransactionStore = defineStore("transaction", {
       return (condition) => state.lineChartData.filter(condition);
     },
     // Calculate metrics for the current and previous day, month, and year
-    checkoutMetrics(state, getters) {
+
+    checkoutMetrics() {
       return (productName) => {
         const today = new Date();
         const prevDay = new Date(today);
@@ -535,36 +653,37 @@ export const useTransactionStore = defineStore("transaction", {
         const prevYear = new Date(today);
         prevYear.setFullYear(today.getFullYear() - 1);
 
-        const currentDayMetrics = this.calculateMetricsForPeriod(
+        const currentDayMetrics = this.CalculateMetricsForPeriod(
           today,
           "day",
           productName
         );
-        const prevDayMetrics = this.calculateMetricsForPeriod(
+        const prevDayMetrics = this.CalculateMetricsForPeriod(
           prevDay,
           "day",
           productName
         );
-        const currentMonthMetrics = this.calculateMetricsForPeriod(
+        const currentMonthMetrics = this.CalculateMetricsForPeriod(
           today,
           "month",
           productName
         );
-        const prevMonthMetrics = this.calculateMetricsForPeriod(
+        const prevMonthMetrics = this.CalculateMetricsForPeriod(
           prevMonth,
           "month",
           productName
         );
-        const currentYearMetrics = this.calculateMetricsForPeriod(
+        const currentYearMetrics = this.CalculateMetricsForPeriod(
           today,
           "year",
           productName
         );
-        const prevYearMetrics = this.calculateMetricsForPeriod(
+        const prevYearMetrics = this.CalculateMetricsForPeriod(
           prevYear,
           "year",
           productName
         );
+
         return {
           scanned: {
             currentDayMetrics: currentDayMetrics.scannedCount,
@@ -586,8 +705,19 @@ export const useTransactionStore = defineStore("transaction", {
       };
     },
 
-    calculateMetricsForPeriod(state) {
+    CalculateMetricsForPeriod(state) {
+      const cache = {};
+
       return (date, period, productName) => {
+        const key = JSON.stringify({
+          date: date.toString(),
+          period,
+          productName,
+        });
+        if (cache[key]) {
+          return cache[key];
+        }
+
         const start = new Date(date);
         const end = new Date(date);
 
@@ -619,18 +749,23 @@ export const useTransactionStore = defineStore("transaction", {
           (item) => item.scanned === "scanned"
         ).length;
 
-        return { completedCount, scannedCount };
+        const result = { completedCount, scannedCount };
+        cache[key] = result;
+        return result;
       };
     },
 
     conversionRate(state) {
       return (prodName) => {
-        const prodScan = state.lineChartData.filter(
-          (item) => item.productName === prodName && item.scanned === "scanned"
+        const prodScan = this.FilterByProductName(
+          state.lineChartData,
+          prodName,
+          "scanned"
         );
-        const prodComp = state.lineChartData.filter(
-          (item) =>
-            item.productName === prodName && item.scanned === "completed"
+        const prodComp = this.FilterByProductName(
+          state.lineChartData,
+          prodName,
+          "completed"
         );
         if (prodScan.length > 0) {
           const convRate = ((prodComp.length / prodScan.length) * 100).toFixed(
@@ -642,11 +777,13 @@ export const useTransactionStore = defineStore("transaction", {
         }
       };
     },
+
     highestCheckout(state) {
       return (productName) => {
-        const productData = state.lineChartData.filter(
-          (item) =>
-            item.productName === productName && item.scanned === "completed"
+        const productData = this.FilterByProductName(
+          state.lineChartData,
+          productName,
+          "completed"
         );
         const dailyMetrics = this.aggregateMetrics(productData, "day");
         const monthlyMetrics = this.aggregateMetrics(productData, "month");
@@ -679,9 +816,10 @@ export const useTransactionStore = defineStore("transaction", {
     },
     lowestCheckout(state) {
       return (productName) => {
-        const productData = state.lineChartData.filter(
-          (item) =>
-            item.productName === productName && item.scanned === "completed"
+        const productData = this.FilterByProductName(
+          state.lineChartData,
+          productName,
+          "completed"
         );
         const dailyMetrics = this.aggregateMetrics(productData, "day");
         const monthlyMetrics = this.aggregateMetrics(productData, "month");
@@ -711,8 +849,18 @@ export const useTransactionStore = defineStore("transaction", {
       };
     },
 
-    aggregateMetrics(state) {
+    aggregateMetrics() {
+      const cache = {};
+
       return (data, period) => {
+        const key = JSON.stringify({
+          data: data.map((d) => d.timestamp),
+          period,
+        });
+        if (cache[key]) {
+          return cache[key];
+        }
+
         const metrics = {};
         const monthNames = [
           "Jan",
@@ -731,33 +879,36 @@ export const useTransactionStore = defineStore("transaction", {
 
         data.forEach((item) => {
           const date = new Date(item.timestamp);
-          let key;
+          let periodKey;
           if (period === "day") {
-            key = date.toLocaleDateString();
+            periodKey = date.toLocaleDateString();
           } else if (period === "month") {
-            key = `${monthNames[date.getMonth()]}-${date.getFullYear()}`;
+            periodKey = `${monthNames[date.getMonth()]}-${date.getFullYear()}`;
           } else if (period === "year") {
-            key = date.getFullYear().toString();
+            periodKey = date.getFullYear().toString();
           }
 
-          if (!metrics[key]) {
-            metrics[key] = { date: key, count: 0 };
+          if (!metrics[periodKey]) {
+            metrics[periodKey] = { date: periodKey, count: 0 };
           }
 
-          metrics[key].count++;
+          metrics[periodKey].count++;
         });
 
-        return Object.values(metrics);
+        const result = Object.values(metrics);
+        cache[key] = result;
+        return result;
       };
     },
 
     highestCheckoutPerLocation(state) {
       return (productName) => {
-        const locationData = state.lineChartData.filter(
-          (item) =>
-            item.productName === productName && item.scanned === "completed"
+        const locationData = this.FilterByProductName(
+          state.lineChartData,
+          productName,
+          "completed"
         );
-        const locationMetrics = this.aggregateMetricsByLocation(locationData);
+        const locationMetrics = this.AggregateMetricsByLocation(locationData);
         const highestLocation = locationMetrics.reduce(
           (max, curr) => (curr.count > max.count ? curr : max),
           { count: 0 }
@@ -768,13 +919,15 @@ export const useTransactionStore = defineStore("transaction", {
         };
       };
     },
+
     lowestCheckoutPerLocation(state) {
       return (productName) => {
-        const locationData = state.lineChartData.filter(
-          (item) =>
-            item.productName === productName && item.scanned === "completed"
+        const locationData = this.FilterByProductName(
+          state.lineChartData,
+          productName,
+          "completed"
         );
-        const locationMetrics = this.aggregateMetricsByLocation(locationData);
+        const locationMetrics = this.AggregateMetricsByLocation(locationData);
         const lowestLocation = locationMetrics.reduce(
           (min, curr) => (curr.count < min.count ? curr : min),
           { count: Infinity }
@@ -786,13 +939,80 @@ export const useTransactionStore = defineStore("transaction", {
         };
       };
     },
+
+    aggregateMetricsByLocation() {
+      return (data) => {
+        const metrics = {};
+
+        data.forEach((item) => {
+          const location = `${item.region}, ${item.city}, ${item.town}, ${item.locality}`;
+          if (!metrics[location]) {
+            metrics[location] = { location, count: 0 };
+          }
+          metrics[location].count++;
+        });
+
+        return Object.values(metrics);
+      };
+    },
+
+    AggregateMetricsByLocation() {
+      const cache = {};
+
+      return (data) => {
+        const key = JSON.stringify(
+          data.map((d) => `${d.region}_${d.city}_${d.town}_${d.locality}`)
+        );
+        if (cache[key]) {
+          return cache[key];
+        }
+
+        const metrics = {};
+
+        data.forEach((item) => {
+          const location = `${item.region}, ${item.city}, ${item.town}, ${item.locality}`;
+          if (!metrics[location]) {
+            metrics[location] = { location, count: 0 };
+          }
+          metrics[location].count++;
+        });
+
+        const result = Object.values(metrics);
+        cache[key] = result;
+        return result;
+      };
+    },
+
+    FilterByProductName() {
+      const cache = {};
+
+      return (data, productName, status) => {
+        const key = JSON.stringify({ productName, status });
+        if (cache[key]) {
+          return cache[key];
+        }
+
+        const filteredData = data.filter(
+          (item) => item.productName === productName && item.scanned === status
+        );
+
+        cache[key] = filteredData;
+        return filteredData;
+      };
+    },
+
+    aggregateMetricsByLocation() {
+      return (data) => this.AggregateMetricsByLocation(data);
+    },
+
     medianCheckoutPerLocation(state) {
       return (productName) => {
-        const locationData = state.lineChartData.filter(
-          (item) =>
-            item.productName === productName && item.scanned === "completed"
+        const locationData = this.FilterByProductName(
+          state.lineChartData,
+          productName,
+          "completed"
         );
-        const locationMetrics = this.aggregateMetricsByLocation(locationData);
+        const locationMetrics = this.AggregateMetricsByLocation(locationData);
 
         // Sort the location metrics by count
         const sortedMetrics = locationMetrics.sort((a, b) => a.count - b.count);
@@ -817,21 +1037,6 @@ export const useTransactionStore = defineStore("transaction", {
       };
     },
 
-    aggregateMetricsByLocation(state) {
-      return (data) => {
-        const metrics = {};
-
-        data.forEach((item) => {
-          const location = `${item.region}, ${item.city}, ${item.town}, ${item.locality}`;
-          if (!metrics[location]) {
-            metrics[location] = { location, count: 0 };
-          }
-          metrics[location].count++;
-        });
-
-        return Object.values(metrics);
-      };
-    },
     // new code ends
     paginatedTrendz(state) {
       const start = (state.currentPageTrendz - 1) * state.pageSizeTrendz;
@@ -864,7 +1069,7 @@ export const useTransactionStore = defineStore("transaction", {
         const response = await getData.getReceipts();
         this.transactions = response.data.results.map((item) => ({
           ...item,
-          download: `http://127.0.0.1:8000/payment/receipt/${item.transaction_id}/`,
+          download: `https://web-production-ef21.up.railway.app/payment/receipt/${item.transaction_id}/`,
         }));
         localStorage.setItem(
           "transactionData",
@@ -904,8 +1109,21 @@ export const useTransactionStore = defineStore("transaction", {
             JSON.stringify(this.trendProducts)
           );
         }
-      } catch (error) {
-        console.error("Error fetching trend products data:", error);
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
+        Notify.create({
+          type: "negative",
+          message: errorMessage,
+        });
       }
     },
     async fetchLoyalCust() {
@@ -923,8 +1141,21 @@ export const useTransactionStore = defineStore("transaction", {
             JSON.stringify(this.loyalCust)
           );
         }
-      } catch (error) {
-        console.error("Error fetching trend products data:", error);
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
+        Notify.create({
+          type: "negative",
+          message: errorMessage,
+        });
       }
     },
     async fetchBarScanData() {
@@ -935,8 +1166,21 @@ export const useTransactionStore = defineStore("transaction", {
           "barScanData",
           JSON.stringify(this.BarScanChartData)
         );
-      } catch (error) {
-        console.error("Failed to fetch bar scan data:", error);
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
+        Notify.create({
+          type: "negative",
+          message: errorMessage,
+        });
       }
     },
     async fetchBarCompleteData() {
@@ -947,22 +1191,50 @@ export const useTransactionStore = defineStore("transaction", {
           "barCompleteData",
           JSON.stringify(this.BarCompleteChartData)
         );
-      } catch (error) {
-        console.error("Failed to fetch bar complete data:", error);
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
+        Notify.create({
+          type: "negative",
+          message: errorMessage,
+        });
       }
     },
     async fetchLineData() {
       try {
         //const response = await getData.getLineChart(); // Replace with your backend endpoint
-        const response = await fetch("../../src/stores/dummy.json");
+        const response = await fetch("/dummy.json");
+        console.log("res", response);
         const data = await response.json();
+        console.log("data", data);
         this.lineChartData = data;
         localStorage.setItem(
           "lineChartData",
           JSON.stringify(this.lineChartData)
         );
-      } catch (error) {
-        console.error("Failed to fetch line data:", error);
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
+        Notify.create({
+          type: "negative",
+          message: errorMessage,
+        });
       }
     },
 
@@ -979,9 +1251,21 @@ export const useTransactionStore = defineStore("transaction", {
       try {
         const response = await getData.getCustomerReport(); // Assuming getReport fetches the file from backend
         return response;
-      } catch (error) {
-        console.error("Error downloading report:", error);
-        throw error;
+      } catch (e) {
+        let errorMessage = "An error occurred during login.";
+
+        // Check if error response has data and a specific error message
+        if (e.response && e.response.data && e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else if (e.message) {
+          // Fallback to error message if no specific error message from server
+          errorMessage = e.message;
+        }
+
+        Notify.create({
+          type: "negative",
+          message: errorMessage,
+        });
       }
     },
   },
