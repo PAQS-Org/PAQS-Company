@@ -5,8 +5,8 @@ import { Loading, QSpinnerBall, Notify } from "quasar";
 
 // Creating Axios instance with default configuration
 const $axios = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-  // baseURL: "https://web-production-9209.up.railway.app",
+  // baseURL: "http://127.0.0.1:8000",
+  baseURL: "https://web-production-9209.up.railway.app",
   withCredentials: true,
   "Content-type": "application/json",
 });

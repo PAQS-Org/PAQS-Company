@@ -12,4 +12,6 @@ export default {
   x: (credentials) => $axios.post("socialLogin/twitter/", credentials),
   google: (credentials) => $axios.post("socialLogin/google/", credentials),
   payment: (data) => $axios.post("payment/initiate-payment/", data),
+  updateCode: (data) => $axios.patch("product/updates/", data),
+  processCodes: (data) => $axios.post("product/generate/", data),
 };

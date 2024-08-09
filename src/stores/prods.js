@@ -1,8 +1,7 @@
 /* eslint-disable linebreak-style */
 import { defineStore } from "pinia";
 // import * as Sentry from '@sentry/vue';
-// import AUTH from 'src/api/auth.js';
-import { $axios } from "boot/axios";
+import AUTH from "src/api/auth.js";
 
 import { ref } from "vue";
 
@@ -128,25 +127,14 @@ export const useProdStore = defineStore({
       this.isLoading = true;
       this.paymentError = null;
       this.paymentSuccess = false;
-      const authStore = useAuthStore();
-      const token = authStore.getAccessToken;
 
       try {
-        const headers = {};
-        if (token) {
-          // $axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-          headers.Authorization = `Bearer ${token}`;
-        }
-        const response = await $axios.post(
-          "payment/initiate-payment/",
-          {
-            email: this.payInfo.email,
-            quantity: this.prodInfo.quantity,
-            product_name: this.prodInfo.prodName,
-            batch_number: this.prodInfo.batchCode,
-          },
-          { headers }
-        );
+        const response = await AUTH.payment({
+          email: this.payInfo.email,
+          quantity: this.prodInfo.quantity,
+          product_name: this.prodInfo.prodName,
+          batch_number: this.prodInfo.batchCode,
+        });
 
         if (response.status === 200) {
           const paymentUrl = response.data.payment_url;
@@ -165,11 +153,11 @@ export const useProdStore = defineStore({
             if (event.data.status === "success") {
               this.paymentSuccess = true;
               this.ProdPost();
-              this.stepperRef.value.next(); // Or handle success state accordingly
-              checkoutWindow.close(); // Close checkout window
+              this.stepperRef.value.next();
+              checkoutWindow.close();
             } else {
               this.paymentError = event.data.message || "Payment failed.";
-              checkoutWindow.close(); // Close checkout window on failure
+              checkoutWindow.close();
             }
 
             window.removeEventListener("message", handleSuccessMessage);
@@ -188,13 +176,27 @@ export const useProdStore = defineStore({
         this.isLoading = false;
       }
     },
-    ProdPost() {
-      const num = 1;
-      return num * 2;
+    async ProdPost() {
+      try {
+        const res = await AUTH.processCodes({
+          company_name: this.companyName,
+          product_name: this.prodInfo.prodName,
+          perish: this.prodInfo.perish,
+          qr_type: this.prodInfo.qrType,
+          quantity: this.prodInfo.quantity,
+        });
+        if (res.status === 201) {
+          console.alert("hurray");
+        }
+      } catch (error) {
+        console.error("Payment request failed:", error);
+      } finally {
+        this.isLoading = false;
+      }
     },
     async updatecodes() {
       try {
-        const res = await $axios.patch("qrcodes/Updates/", {
+        const res = await AUTH.updateCode({
           product_name: this.prodInfo.prodName,
           batch: this.prodInfo.batchCode,
           reason: this.prodInfo.reason,
